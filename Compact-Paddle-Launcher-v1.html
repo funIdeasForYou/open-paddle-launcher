@@ -1,0 +1,701 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}
+img{max-width:100%}
+[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Compact Paddle Launcher</title>
+<style>:root{
+  --paper:#ECEFEB; --sheet:#F8FAF7; --ink:#16222A; --ink2:#4A5960; --rule:#C2CBC5; --faint:#DCE2DD; --wash:#E3E8E3;
+  --drive:#2A5B89; --paddle:#A97A35; --energy:#C2451A; --stop:#2B7655; --absorb:#6650A3; --steel:#78858B; --steel2:#AEB8BB; --wood:#D9C9A8;
+  --on:#2B7655; --off:#8A969B; --hot:#C2451A;
+  --f-display:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#101518; --sheet:#171E23; --ink:#DCE4E7; --ink2:#9AA8AE; --rule:#2F3B42; --faint:#253037; --wash:#1C252B;
+  --drive:#73A8D8; --paddle:#D3A762; --energy:#F07B4C; --stop:#5DBE8F; --absorb:#A897E2; --steel:#8E9BA1; --steel2:#56636A; --wood:#4A4130;
+  --on:#5DBE8F; --off:#6E7C83; --hot:#F07B4C; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#101518; --sheet:#171E23; --ink:#DCE4E7; --ink2:#9AA8AE; --rule:#2F3B42; --faint:#253037; --wash:#1C252B;
+  --drive:#73A8D8; --paddle:#D3A762; --energy:#F07B4C; --stop:#5DBE8F; --absorb:#A897E2; --steel:#8E9BA1; --steel2:#56636A; --wood:#4A4130;
+  --on:#5DBE8F; --off:#6E7C83; --hot:#F07B4C; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;letter-spacing:.01em;text-wrap:balance;margin:0}
+h1{font-size:clamp(26px,3.4vw,38px);line-height:1.05}
+h2{font-size:22px}
+h3{font-size:16px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);font-weight:600}
+p{margin:0}
+header{display:flex;flex-direction:column;gap:10px;border-bottom:2px solid var(--ink);padding-bottom:14px}
+.titlerow{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 20px}
+.dwg{font-family:var(--f-mono);font-size:12px;color:var(--ink2);letter-spacing:.04em}
+.lede{max-width:74ch;color:var(--ink2)}
+.specs{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--f-mono);font-size:13px}
+.specs b{font-weight:500;color:var(--ink)}
+.specs span{color:var(--ink2)}
+.card{background:var(--sheet);border:1px solid var(--rule);border-radius:4px}
+.drawing{padding:10px 10px 6px;min-width:0}
+.scroller{overflow-x:auto}
+.drawing svg{display:block;width:100%;height:auto;max-width:100%}
+@media (max-width:560px){.drawing svg{min-width:520px}}
+.dwgbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding:6px 6px 2px;font-size:13px;color:var(--ink2)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+label.tog{display:inline-flex;gap:6px;align-items:center;cursor:pointer;user-select:none}
+.kk{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2)}
+.state{display:flex;flex-direction:column;gap:4px;padding-bottom:12px;border-bottom:1px solid var(--rule)}
+.state .name{font-family:var(--f-display);font-size:24px;font-weight:600;line-height:1.1}
+.state .what{color:var(--ink2);font-size:14px;min-height:3em}
+.energy{display:flex;flex-direction:column;gap:6px}
+.energy .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.energy .big{font-family:var(--f-display);font-size:30px;font-weight:600;line-height:1}
+.energy .big small{font-size:16px;color:var(--ink2);font-weight:500}
+input[type=range]{width:100%;accent-color:var(--energy)}
+.pred{font-family:var(--f-mono);font-size:12.5px;color:var(--ink2);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 10px}
+.pred b{color:var(--ink);font-weight:500}
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.steps button{all:unset;box-sizing:border-box;cursor:pointer;border:1.5px solid var(--rule);border-radius:4px;padding:8px 10px;display:flex;flex-direction:column;gap:1px;background:var(--sheet);min-width:0}
+.steps button .n{font-family:var(--f-display);font-weight:600;font-size:17px}
+.steps button .d{font-family:var(--f-mono);font-size:11.5px;color:var(--ink2)}
+.steps button[disabled]{opacity:.42;cursor:not-allowed}
+.steps button.next{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.steps button:focus-visible,.runrow button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--drive);outline-offset:2px}
+.runrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.runrow button{all:unset;box-sizing:border-box;cursor:pointer;background:var(--ink);color:var(--sheet);font-family:var(--f-display);font-weight:600;font-size:16px;padding:8px 14px;border-radius:4px}
+.runrow button[disabled]{opacity:.45;cursor:not-allowed}
+.runrow select{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--rule);border-radius:4px;background:var(--sheet);color:var(--ink)}
+.hint{font-size:13px;color:var(--ink2);min-height:1.3em}
+.read{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.read .cell{border-top:1px solid var(--rule);padding-top:6px;min-width:0}
+.read .v{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:12px;font-weight:500;padding:1px 7px;border-radius:999px;border:1px solid currentColor}
+.pill.on{color:var(--on)}
+.pill.off{color:var(--off)}
+.pill.hot{color:var(--hot)}
+.pill.lock{color:var(--drive)}
+.schem svg{display:block;width:100%;height:auto}
+section{display:flex;flex-direction:column;gap:12px}
+.sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 16px;border-bottom:1px solid var(--ink);padding-bottom:6px}
+.sec-head p{color:var(--ink2);font-size:14px;max-width:72ch}
+.tbl{overflow-x:auto;border:1px solid var(--rule);border-radius:4px;background:var(--sheet)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--faint);vertical-align:top}
+th{font-family:var(--f-display);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);background:var(--wash);white-space:nowrap}
+td.num,th.num{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.grp td{font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.06em;text-transform:uppercase;background:var(--wash);color:var(--ink)}
+tr.tot td{font-family:var(--f-display);font-weight:600;font-size:16px;border-top:2px solid var(--ink)}
+.bal{display:inline-grid;place-items:center;width:24px;height:24px;border:1.5px solid var(--ink);border-radius:50%;font-family:var(--f-mono);font-size:12px;font-weight:500}
+.tag{font-family:var(--f-mono);font-size:11.5px;padding:1px 6px;border-radius:3px;white-space:nowrap}
+.tag.v{background:color-mix(in srgb,var(--on) 16%,transparent);color:var(--on)}
+.tag.s{background:color-mix(in srgb,var(--paddle) 18%,transparent);color:var(--paddle)}
+.tag.m{background:color-mix(in srgb,var(--energy) 16%,transparent);color:var(--energy)}
+td a{color:var(--drive)}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:820px){.cols{grid-template-columns:minmax(0,1fr)}}
+.notes{display:flex;flex-direction:column;gap:10px;padding:14px 16px}
+.notes ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.notes li{max-width:72ch}
+.cl{fill:none;stroke:var(--steel);stroke-width:.7;stroke-dasharray:14 3 2 3}
+.board{fill:color-mix(in srgb,var(--wood) 45%,var(--sheet));stroke:color-mix(in srgb,var(--wood) 80%,var(--ink));stroke-width:1}
+.stl{fill:var(--steel2);stroke:var(--steel);stroke-width:1}
+.drv{fill:color-mix(in srgb,var(--drive) 22%,var(--sheet));stroke:var(--drive);stroke-width:1.3}
+.abs{fill:color-mix(in srgb,var(--absorb) 22%,var(--sheet));stroke:var(--absorb);stroke-width:1.3}
+.ghost{fill:none;stroke:var(--paddle);stroke-width:1;opacity:.35}
+.sweep{fill:color-mix(in srgb,var(--paddle) 10%,transparent);stroke:var(--paddle);stroke-width:.8;stroke-dasharray:5 4}
+.tx{font-family:var(--f-mono);font-size:11px;fill:var(--ink2)}
+.balloon circle{fill:var(--sheet);stroke:var(--ink);stroke-width:1.1}
+.balloon text{font-family:var(--f-mono);font-size:11px;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.balloon line{stroke:var(--ink);stroke-width:.7}
+.flow{stroke-dasharray:5 4;animation:flow .6s linear infinite}
+.flow.rev{animation-direction:reverse}
+@keyframes flow{to{stroke-dashoffset:-9}}
+@media (prefers-reduced-motion:reduce){.flow{animation:none}}
+.sch-box{fill:var(--sheet);stroke:var(--rule);stroke-width:1.2}
+.sch-box.act{stroke:var(--ink);stroke-width:1.6}
+.sch-t{font-family:var(--f-display);font-size:12px;font-weight:600;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.sch-s{font-family:var(--f-mono);font-size:9.5px;fill:var(--ink2);text-anchor:middle}
+.sch-e{fill:none;stroke:var(--rule);stroke-width:2.2}
+.sch-e.act{stroke:var(--drive)}
+.sch-e.en-act{stroke:var(--energy)}
+.sch-e.st-act{stroke:var(--stop)}
+.mlbl{font-family:var(--f-mono);font-size:11px;fill:var(--drive);text-anchor:middle;letter-spacing:.04em}
+.lede a{color:var(--drive)}
+.bench2{display:flex;flex-direction:column;gap:18px}
+.bench2 .drawing svg{min-width:0}
+@media (max-width:700px){.bench2 .drawing svg{min-width:640px}}
+.panel2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px 26px;padding:16px}
+.panel2>div{display:flex;flex-direction:column;gap:14px;min-width:0}
+@media (max-width:820px){.panel2{grid-template-columns:minmax(0,1fr)}}
+.steps.steps3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.wood{fill:color-mix(in srgb,var(--wood) 70%,var(--sheet));stroke:color-mix(in srgb,var(--wood) 85%,var(--ink));stroke-width:1}
+.hook{fill:color-mix(in srgb,var(--stop) 30%,var(--sheet));stroke:var(--stop);stroke-width:1.4}
+.servo{fill:color-mix(in srgb,var(--stop) 14%,var(--sheet));stroke:var(--stop);stroke-width:1.2}
+.cage{fill:color-mix(in srgb,var(--wood) 55%,var(--sheet));stroke:color-mix(in srgb,var(--paddle) 70%,var(--ink));stroke-width:1.2;fill-opacity:.55}
+.roll{fill:color-mix(in srgb,var(--steel2) 60%,var(--sheet));stroke:var(--ink2);stroke-width:1.1}
+.padT{fill:color-mix(in srgb,var(--paddle) 55%,var(--sheet));stroke:var(--paddle);stroke-width:1.4;fill-opacity:.62}
+.leg{fill:none;stroke:var(--energy);stroke-width:5;stroke-linecap:round}
+.coil{fill:none;stroke:var(--energy);stroke-width:2.2}
+.sect .lbl{font-family:var(--f-mono);font-size:10.5px;fill:var(--ink)}
+.sect .lbl2{font-family:var(--f-mono);font-size:9.5px;fill:var(--ink2)}
+.sect line.ld{stroke:var(--ink);stroke-width:.7}
+.sect .dim{stroke:var(--ink2);stroke-width:.8;fill:none}
+.code{font-family:var(--f-mono);font-size:12.5px;line-height:1.5;background:var(--wash);border:1px solid var(--rule);border-radius:4px;padding:12px 14px;overflow-x:auto;white-space:pre;margin:0;color:var(--ink)}
+.notes ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.notes ol li{max-width:72ch}
+.bolt{fill:var(--steel2);stroke:var(--ink2);stroke-width:1}
+.views{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px;align-items:center}
+@media (max-width:900px){.views{grid-template-columns:minmax(0,1fr)}}
+#detail{border-left:1px solid var(--rule)}
+@media (max-width:900px){#detail{border-left:0;border-top:1px solid var(--rule)}}</style>
+
+<div class="wrap">
+<header>
+  <div class="titlerow">
+    <h1>Paddle launcher v1, compact build</h1>
+    <div class="dwg">DWG PL-03 · FRONT VIEW + SIDE SECTION · MM · NEMA 23 + 10:1 WORM</div>
+  </div>
+  <p class="lede">The layout: NEMA 23 into a 10:1 worm gearbox, spring around the output shaft, paddle on the end. A drive arm keyed to the shaft drags the paddle back with a hook. A servo opens the hook to fire. The paddle hub turns on its own bushing, so once the hook lets go nothing connects the swing to the gearbox. Top setting is 20 m/s at the tip.</p>
+  <div class="specs">
+    <span>Tip speed <b>3.8–20 m/s</b></span><span>Average acceleration <b id="hdrA">7,000–33,200 °/s²</b></span><span>Cock angle <b>20°–120°</b></span><span>Top-setting cycle <b>≈ 1.4 s cock + 0.7 s reset</b></span><span>Stack in front of the gearbox <b>≈ 130 mm</b></span><span>BOM <b>≈ $128</b> + gearbox</span>
+  </div>
+</header>
+
+<div class="bench2">
+  <div class="card drawing">
+    <div class="views">
+    <div class="scroller">
+    <svg id="view" viewBox="-470 -448 950 728" role="img" aria-label="Front view of the compact launcher, animated">
+      <g id="world" transform="scale(1,-1)">
+        <path id="sweepA" class="sweep" d=""></path>
+        <path id="sweepB" class="sweep" d="" style="stroke-dasharray:2 3"></path>
+        <rect class="wood" x="-215" y="-270" width="430" height="400" style="fill-opacity:.5"></rect>
+        <line class="cl" x1="-200" y1="0" x2="200" y2="0"></line>
+        <line class="cl" x1="0" y1="-250" x2="0" y2="440"></line>
+                <rect class="stl" x="-56" y="-58" width="112" height="112" rx="10" style="fill-opacity:.55"></rect>
+        <circle r="34" fill="none" stroke="var(--steel)" stroke-width="1"></circle>
+        <rect class="drv" x="-64" y="-84" width="48" height="26" rx="3"></rect>
+        <rect class="drv" x="-68.5" y="-164" width="57" height="80" rx="3"></rect>
+                <g>
+          <circle class="coil" r="31"></circle><circle class="coil" r="21" style="stroke-dasharray:4 3"></circle>
+          <path id="legA" class="leg" d=""></path>
+          <circle id="anchorPost" class="bolt" r="5.5"></circle>
+          <circle id="stopPost" class="bolt" r="6"></circle>
+          <path id="legM" class="leg" d=""></path>
+        </g>
+                <g id="armG">
+          <path id="armBar" class="drv" d="" style="fill-opacity:.75"></path>
+          <circle r="22" class="stl"></circle>
+          <circle cx="0" cy="14" r="2.5" fill="var(--ink2)"></circle><circle cx="0" cy="-14" r="2.5" fill="var(--ink2)"></circle>
+          <line x1="91" y1="41.7" x2="91" y2="27" stroke="var(--stop)" stroke-width="1.4" stroke-dasharray="2 2"></line>
+          <g id="hookG"><path id="hookPath" class="hook" d=""></path><circle cx="59.9" cy="46.7" r="3.5" class="bolt"></circle></g>
+          <rect class="servo" x="80.6" y="65.5" width="26" height="13" rx="2"></rect>
+          <rect class="servo" x="76" y="68.5" width="35" height="7" rx="1.5" style="fill-opacity:.4"></rect>
+          <g id="hornG"><rect x="93.2" y="58" width="2.6" height="14" class="servo"></rect><circle cx="94.5" cy="58.1" r="3" class="roll"></circle><circle cx="94.5" cy="71.9" r="2" fill="var(--stop)"></circle></g>
+        </g>
+                <g id="absG">
+          <rect class="stl" x="96" y="-20" width="10" height="40"></rect>
+          <rect class="abs" x="40" y="-12.5" width="112" height="25" rx="2"></rect>
+          <rect class="abs" x="88" y="-17" width="6" height="34" rx="1"></rect>
+          <rect class="abs" x="108" y="-17" width="6" height="34" rx="1"></rect>
+          <rect id="absRod" class="stl" x="8" y="-3.5" width="32" height="7"></rect>
+          <rect id="absCap" class="abs" x="0" y="-11" width="8" height="22" rx="2.5"></rect>
+        </g>
+        <g id="ghosts"></g>
+                <g id="hubG">
+          <rect class="cage" x="-19" y="-64" width="38" height="126" rx="5"></rect>
+          <rect class="stl" x="19" y="-68" width="12" height="13" rx="1.5"></rect>
+          <circle r="11" fill="none" stroke="var(--steel)" stroke-dasharray="3 2"></circle>
+          <circle cx="0" cy="-48" r="11" class="roll"></circle><circle cx="0" cy="-48" r="5" class="bolt" style="stroke:var(--energy)"></circle>
+          <rect class="padT" x="-13" y="25" width="26" height="117" rx="5"></rect>
+          <rect class="stl" x="-16" y="44" width="32" height="5"></rect><rect class="stl" x="-16" y="112" width="32" height="5"></rect>
+          <path class="padT" d="M-13,140 L-7,162 L-7,394 Q0,410 7,394 L7,162 L13,140 Z"></path>
+          <circle r="4" class="bolt"></circle>
+        </g>
+      </g>
+      <text class="mlbl" x="-40" y="128">NEMA 23</text>
+      <text class="mlbl" x="-100" y="-40" style="fill:var(--ink2)">10:1 WORM</text>
+      <text id="sweepTx" class="tx" x="-460" y="-428" style="font-size:12px"></text>
+      <text id="clock" class="tx" x="470" y="-405" text-anchor="end" style="font-size:12px"></text>
+    </svg>
+    </div>
+    <div class="scroller">
+    <svg id="detail" viewBox="-190 -170 405 380" role="img" aria-label="Enlarged detail of the hub, drive arm, hook and spring, animated with the main view">
+      <use href="#world"></use>
+      <text class="tx" x="-184" y="-156">DETAIL · HUB, ARM, HOOK, SPRING · 2.4×</text>
+      <g id="balloons"></g>
+    </svg>
+    </div>
+    </div>
+    <div class="dwgbar">
+      <div class="legend">
+        <span><i style="background:var(--drive)"></i>Motor, gearbox &amp; drive arm</span>
+        <span><i style="background:var(--stop)"></i>Hook &amp; servo</span>
+        <span><i style="background:var(--energy)"></i>Spring</span>
+        <span><i style="background:var(--absorb)"></i>Absorber</span>
+        <span><i style="background:var(--paddle)"></i>Paddle &amp; hub</span>
+      </div>
+      <label class="tog"><input type="checkbox" id="showBal" checked> Item numbers</label>
+    </div>
+  </div>
+
+  <div class="card panel2">
+    <div>
+      <div class="state">
+        <div class="kk">Machine state</div>
+        <div class="name" id="stName">At rest</div>
+        <div class="what" id="stWhat"></div>
+      </div>
+      <div class="energy">
+        <div class="row"><label for="accel" class="kk">Average acceleration</label><div class="big"><span id="aVal">20,000</span><small> °/s²</small></div></div>
+        <input type="range" id="accel" min="7000" max="33200" step="100" value="20000">
+        <div class="pred">
+          <span>tip speed <b id="pTip"></b></span><span>cock angle <b id="pTh"></b></span>
+          <span>end speed <b id="pW"></b></span><span>paddle energy <b id="pE"></b></span>
+          <span>swing time <b id="pT"></b></span><span>spring torque <b id="pSp"></b></span>
+          <span>motor torque <b id="pTau"></b></span><span>cock time <b id="pC"></b></span>
+        </div>
+      </div>
+      <div class="steps steps3">
+        <button id="bCock"><span class="n">1 · Cock</span><span class="d" id="dCock"></span></button>
+        <button id="bFire"><span class="n">2 · Fire</span><span class="d">servo · 70°</span></button>
+        <button id="bReset"><span class="n">3 · Reset</span><span class="d" id="dReset"></span></button>
+      </div>
+      <div class="runrow">
+        <button id="bAuto">Run one shot</button>
+        <label for="slow" class="hint" style="min-height:0">Swing playback</label>
+        <select id="slow"><option value="40" selected>40× slower</option><option value="10">10× slower</option><option value="1">Real time</option></select>
+      </div>
+      <div class="hint" id="hint"></div>
+    </div>
+    <div>
+      <div class="read">
+        <div class="cell"><div class="kk">NEMA 23</div><div class="v" id="rMotor"></div></div>
+        <div class="cell"><div class="kk">Drive arm</div><div class="v" id="rArm"></div></div>
+        <div class="cell"><div class="kk">Servo &amp; hook</div><div class="v" id="rServo"></div></div>
+        <div class="cell"><div class="kk">Spring</div><div class="v" id="rSpring"></div></div>
+        <div class="cell"><div class="kk">Paddle</div><div class="v" id="rPad"></div></div>
+        <div class="cell"><div class="kk">Paddle speed</div><div class="v" id="rW"></div></div>
+        <div class="cell"><div class="kk">Tip speed</div><div class="v" id="rTip"></div></div>
+        <div class="cell"><div class="kk">Absorber</div><div class="v" id="rAbs"></div></div>
+      </div>
+      <div class="schem">
+        <svg viewBox="0 0 360 200" role="img" aria-label="Schematic: NEMA 23 drives the 10:1 worm and drive arm; the hook on the arm holds the paddle; the servo opens the hook; the spring drives the paddle; the absorber stops it">
+          <path id="eMS" class="sch-e" d="M70,32 H96"></path>
+          <path id="eSW" class="sch-e" d="M178,32 H272"></path>
+          <path id="eWH" class="sch-e" d="M313,48 V68 H191 V84"></path>
+          <path id="eVH" class="sch-e" d="M70,100 H150"></path>
+          <path id="eHP" class="sch-e" d="M191,116 V152"></path>
+          <path id="eSP" class="sch-e" d="M70,168 H150"></path>
+          <path id="ePA" class="sch-e" d="M232,168 H272"></path>
+          <rect id="nM" class="sch-box" x="4" y="16" width="66" height="32" rx="4"></rect><text class="sch-t" x="37" y="32">NEMA 23</text>
+          <rect id="nS" class="sch-box" x="96" y="16" width="82" height="32" rx="4"></rect><text class="sch-t" x="137" y="27">10:1 worm</text><text class="sch-s" x="137" y="42">output shaft</text>
+          <rect id="nW" class="sch-box" x="272" y="16" width="82" height="32" rx="4"></rect><text class="sch-t" x="313" y="27">Drive arm</text><text class="sch-s" x="313" y="42">keyed</text>
+          <rect id="nV" class="sch-box" x="4" y="84" width="66" height="32" rx="4"></rect><text class="sch-t" x="37" y="100">Servo</text>
+          <rect id="nH" class="sch-box" x="150" y="84" width="82" height="32" rx="4"></rect><text class="sch-t" x="191" y="100">Hook</text>
+          <rect id="nT" class="sch-box" x="4" y="152" width="66" height="32" rx="4"></rect><text class="sch-t" x="37" y="163">Spring</text><text class="sch-s" x="37" y="177">preloaded</text>
+          <rect id="nP" class="sch-box" x="150" y="152" width="82" height="32" rx="4"></rect><text class="sch-t" x="191" y="163">Paddle hub</text><text class="sch-s" x="191" y="177">free bushing</text>
+          <rect id="nA" class="sch-box" x="272" y="152" width="82" height="32" rx="4"></rect><text class="sch-t" x="313" y="168">Absorber</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="sec-head"><h2>Side section along the output shaft</h2><p>Seen from the right, the front of the machine to the right. Everything sits on the gearbox's own output shaft. Only the drive arm is keyed to it. The paddle hub turns on a bronze bushing, and the spring's coil just rides on the shaft.</p></div>
+  <div class="card drawing">
+    <div class="scroller">
+    <svg class="sect" style="max-width:780px;margin:0 auto" viewBox="-150 -205 660 400" role="img" aria-label="Side section: board, gearbox with motor below, spring around the shaft, drive arm with hook, paddle hub on a bushing, paddle handle">
+      <g transform="scale(1,-1)">
+        <rect class="wood" x="-129" y="-190" width="19" height="320"></rect>
+        <rect class="stl" x="-110" y="-56" width="110" height="112" rx="6" style="fill-opacity:.55"></rect>
+        <rect class="drv" x="-83" y="-84" width="56" height="26" rx="3"></rect>
+        <rect class="drv" x="-83.5" y="-164" width="57" height="80" rx="3"></rect>
+        <rect class="stl" x="-100" y="-9" width="232" height="18"></rect>
+        <rect class="stl" x="132" y="-14" width="5" height="28"></rect>
+                <path class="coil" d="M4,-31 L9.7,31 L15.4,-31 L21.1,31 L26.8,-31 L32.5,31 L38.2,-31 L43.9,31 L49.6,-31 L55.3,31 L61,-31 L66,31" style="stroke-width:4"></path>
+        <line class="leg" x1="6" y1="18" x2="6" y2="40"></line>
+        <rect class="bolt" x="0" y="20" width="14" height="10"></rect>
+        <line class="leg" x1="63" y1="-18" x2="63" y2="-50"></line>
+        <rect class="bolt" x="0" y="-37" width="70" height="12"></rect>
+                <rect class="stl" x="68" y="-22" width="12" height="44"></rect>
+        <rect class="drv" x="80" y="-14" width="6.4" height="128" style="fill-opacity:.75"></rect>
+        <rect class="hook" x="86.4" y="-62" width="6.4" height="46"></rect>
+        <rect class="servo" x="86.4" y="78" width="20" height="26" style="stroke-dasharray:3 2"></rect>
+                <rect class="cage" x="100" y="-64" width="25.4" height="126" style="fill-opacity:.8"></rect>
+        <rect class="stl" x="100" y="-11" width="25.4" height="22" style="fill-opacity:.7"></rect>
+        <rect class="bolt" x="58" y="-53" width="67" height="10" style="stroke:var(--energy)"></rect>
+        <rect class="roll" x="85" y="-59" width="9" height="22"></rect>
+        <rect class="abs" x="102" y="-56" width="21" height="96" style="fill-opacity:.25;stroke-dasharray:4 3"></rect>
+                <rect class="padT" x="125.4" y="25" width="25" height="117" rx="4"></rect>
+        <path class="padT" d="M131,142 L131,190 M145,142 L145,190" style="fill:none;stroke-dasharray:5 3"></path>
+      </g>
+      <g>
+        <line class="ld" x1="-119" y1="-120" x2="-119" y2="-150"></line><text class="lbl" x="-140" y="-158">Board</text>
+        <line class="ld" x1="-60" y1="-40" x2="-60" y2="-80"></line><text class="lbl" x="-96" y="-98">10:1 worm</text><text class="lbl2" x="-96" y="-86">gearbox</text>
+        <line class="ld" x1="-55" y1="130" x2="-55" y2="172"></line><text class="lbl" x="-148" y="184">NEMA 23 (below)</text>
+        <line class="ld" x1="35" y1="-31" x2="35" y2="-150"></line><text class="lbl" x="6" y="-170">Torsion spring</text><text class="lbl2" x="6" y="-158">preloaded, rides on shaft</text>
+        <line class="ld" x1="7" y1="-25" x2="-20" y2="-120"></line><text class="lbl" x="-112" y="-132">Anchor post</text>
+        <line class="ld" x1="40" y1="31" x2="20" y2="120"></line><text class="lbl" x="-60" y="134">Leg stop (holds preload)</text>
+        <line class="ld" x1="83" y1="-100" x2="250" y2="-160"></line><text class="lbl" x="256" y="-164">Drive arm, keyed flange</text>
+        <line class="ld" x1="100" y1="-91" x2="250" y2="-128"></line><text class="lbl" x="256" y="-132">Servo on the arm</text>
+        <line class="ld" x1="140" y1="-80" x2="250" y2="-96"></line><text class="lbl" x="256" y="-100">Paddle handle, hose clamps</text>
+        <line class="ld" x1="112" y1="-30" x2="250" y2="-64"></line><text class="lbl" x="256" y="-68">Absorber (right of shaft)</text>
+        <line class="ld" x1="118" y1="-14" x2="250" y2="-32"></line><text class="lbl" x="256" y="-28">Paddle hub on bronze bushing</text>
+        <line class="ld" x1="135" y1="8" x2="250" y2="4"></line><text class="lbl" x="256" y="8">Retaining washer + bolt</text>
+        <line class="ld" x1="90" y1="24" x2="250" y2="40"></line><text class="lbl" x="256" y="44">Hook and pin roller</text>
+        <line class="ld" x1="70" y1="48" x2="250" y2="76"></line><text class="lbl" x="256" y="80">Pin through the hub</text><text class="lbl2" x="256" y="92">rear end pushes the spring leg</text>
+        <path class="dim" d="M0,172 V164 M137,172 V164 M0,168 H137"></path>
+        <text class="lbl2" x="68" y="186" text-anchor="middle">≈ 137 mm from gearbox face</text>
+      </g>
+    </svg>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>Acceleration settings</h2><p>Average acceleration is end speed² ÷ (2 × cock angle). The paddle turns 15° before its pin picks up the spring leg, which keeps the low settings gentle. The spring is preloaded to 11.5 N·m on its leg stop and rises 0.0996 N·m per degree after pickup. Paddle 0.022 kg·m²; paddle plus hub 0.0228 kg·m². Motor torque assumes 85% gearbox efficiency.</p></div>
+  <div class="tbl"><table id="eTable"><thead><tr><th class="num">Avg accel</th><th class="num">Tip speed</th><th class="num">Cock angle</th><th class="num">End speed</th><th class="num">Paddle energy</th><th class="num">Swing</th><th class="num">Spring torque</th><th class="num">Motor torque</th><th class="num">Motor turns</th><th class="num">Cock time</th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>Firmware cycle</h2><p>Strength is only the number of motor turns in step 1: 10 motor turns per output turn, so 44.4 steps per degree at 1600 steps per motor turn.</p></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Actuator</th><th class="num">Motor turns</th><th class="num">Real time</th><th>What moves</th></tr></thead>
+    <tbody>
+      <tr><td><b>0 · Home</b><br>at power-up</td><td>NEMA 23 forward, slowly</td><td class="num">until it stalls</td><td class="num">≤ 2 s</td><td>With the hook open, the arm turns forward until it rests on the paddle's pin with the paddle on its absorber cap. Then the servo locks the hook. Count from here. A small home switch on the arm can replace the stall.</td></tr>
+      <tr><td><b>1 · Cock</b></td><td>NEMA 23 back</td><td class="num" id="fwCock"></td><td class="num" id="fwCockT"></td><td>The arm turns back and the hook drags the paddle. For 15° only the paddle moves. Then the pin picks the spring leg off its stop and winds it. Run at up to 300 rpm, slowing to 60 rpm for the last part of a top-setting cock.</td></tr>
+      <tr><td><b>Hold</b></td><td>NEMA 23 powered</td><td class="num">0</td><td class="num">as long as needed</td><td>A 10:1 worm can be back-driven, so the driver stays enabled. Holding needs up to about 1.7 N·m at the motor. Set the driver's idle current to at least 70%.</td></tr>
+      <tr><td><b>2 · Fire</b></td><td>servo 70°</td><td class="num">0</td><td class="num">≈ 0.1 s + swing</td><td>The servo swings its horn roller off the hook's tail. The pin roller pushes the hook open, and the paddle swings on its bushing: spring leg back to its stop, a coast to vertical, then the absorber. The arm, gearbox and motor stay still.</td></tr>
+      <tr><td><b>3 · Reset</b></td><td>NEMA 23 forward, then servo back</td><td class="num">same as step 1</td><td class="num" id="fwResetT"></td><td>The arm turns forward to the paddle. The hook's sloped nose rides over the pin roller and snaps shut, then the servo swings its roller back over the tail.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<div class="cols">
+  <div class="card notes">
+    <h3>ESP32 wiring</h3>
+    <div class="tbl" style="border:0"><table>
+      <thead><tr><th>Signal</th><th>ESP32</th><th>Goes to</th></tr></thead>
+      <tbody>
+        <tr><td>Step</td><td>GPIO 25</td><td>Driver PUL/STEP</td></tr>
+        <tr><td>Direction</td><td>GPIO 26</td><td>Driver DIR</td></tr>
+        <tr><td>Enable</td><td>GPIO 27</td><td>Driver ENA. Keep enabled while cocked</td></tr>
+        <tr><td>Servo signal</td><td>GPIO 18</td><td>MG996R orange wire, 50 Hz, 500–2500 µs</td></tr>
+        <tr><td>Servo power</td><td>—</td><td>6 V, 3 A from the power supply (a buck converter off 24 V). Common ground with the ESP32. Leave a slack loop: the servo rides on the arm through 120°</td></tr>
+        <tr><td>Fire input</td><td>GPIO 33</td><td>Button to GND, or fire over Wi-Fi</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="card notes">
+    <h3>Core of the sketch</h3>
+<pre class="code">// AccelStepper + ESP32Servo. 1600 steps per motor turn, 10:1 worm
+const float STEPS_PER_DEG = 1600.0 * 10 / 360;   // 44.4
+float cockDeg(long accel);           // from the settings table
+
+void shoot(long accel) {
+  hook.write(LOCK);
+  stepper.setMaxSpeed(8000);         // 300 rpm
+  stepper.moveTo(-cockDeg(accel) * STEPS_PER_DEG);
+  while (stepper.distanceToGo()) {
+    if (stepper.currentPosition() < -95 * STEPS_PER_DEG)
+      stepper.setMaxSpeed(1600);     // 60 rpm near the top
+    stepper.run();
+  }
+  waitForFire();                     // driver stays enabled
+  hook.write(RELEASE);  delay(300);  // paddle has swung
+  stepper.setMaxSpeed(8000);
+  stepper.moveTo(0);  stepper.runToPosition();  // arm back, hook snaps over
+  hook.write(LOCK);
+}</pre>
+  </div>
+</div>
+
+<section>
+  <div class="sec-head"><h2>Bill of materials</h2><p>Item numbers match the drawing. The paddle, NEMA 23, driver, ESP32 and power supply are not included. The 10:1 gearbox is listed but not counted. Prices are rough estimates of typical US listings. <span class="tag s">spec</span> buy to this spec · <span class="tag m">make</span> cut, drill or tap</p></div>
+  <div class="tbl"><table id="bom">
+    <thead><tr><th>#</th><th>Part</th><th>Specification</th><th class="num">Qty</th><th class="num">Est. $</th><th>Status</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+</section>
+
+<div class="cols">
+  <div class="card notes">
+    <h3>Build steps</h3>
+    <ol>
+      <li><b>Gearbox.</b> Bolt the gearbox to the board with the output shaft pointing forward and the motor hanging below. Fit the long keyed output shaft so about 140 mm sticks out of the front.</li>
+      <li><b>Spring.</b> Slide it onto the shaft against the gearbox face. Put its rear leg against the anchor post. Wind the front leg about 116° with a bar and drop it behind the leg-stop post. It now holds 11.5 N·m on its own, so keep fingers clear.</li>
+      <li><b>Drive arm.</b> Bolt the arm to the keyed flange, then key and set-screw the flange onto the shaft just in front of the spring. Mount the hook on its pivot, the servo beside the hook's tail, and a light spring that pulls the hook closed.</li>
+      <li><b>Paddle hub.</b> Press the two bushings into the 1 in thick aluminum block and slide it on the shaft end. Hold it with a washer and a bolt into the shaft's end. The M10 pin goes through the block 48 mm below the centre: its roller lines up with the hook, and its rear end reaches back to the spring's front leg.</li>
+      <li><b>Paddle and absorber.</b> Clamp the handle on the hub with two hose clamps. Bolt the absorber's bracket to the board so its cap just touches the hub's stop tab with the paddle vertical.</li>
+    </ol>
+  </div>
+  <div class="card notes">
+    <h3>Calibrate, limits, safety</h3>
+    <ul>
+      <li><b>1 · Find the pickup.</b> Put a strip of paper between the pin and the spring leg. Jog the cock until the paper pinches, and store that angle as the slack (designed at 15°). At 7,000 °/s², 0.1° of error moves the shot about 3%.</li>
+      <li><b>2 · Check the top.</b> Fire at the top setting and film it at 240 fps, or use a speed sensor. If the tip misses 20 m/s, scale the firmware's spring rate by (measured ÷ 20)².</li>
+      <li><b>Motor.</b> A top-setting cock needs 22 N·m at the shaft, which is about 2.7 N·m at the motor. Use a NEMA 23 rated about 3 N·m holding, and finish the cock at 60 rpm. The spring's preload means a weaker motor loses a lot: a 1.9 N·m motor would stall at about 10 m/s.</li>
+      <li><b>Spring.</b> It is the one part to buy carefully. Look for 0.88 in-lb per degree, rated for at least 240° of deflection and 200 in-lb, left-hand wound, coil ID over 20 mm.</li>
+      <li><b>Absorber.</b> The top shot puts about 28 J into it, arriving at 3.3 m/s, inside an AC2525's rating.</li>
+      <li><b>Safety.</b> The spring holds 11.5 N·m even at rest, and about 42 J at the top setting. Keep the driver enabled while cocked: if power drops, the paddle stays hooked and unwinds back through the gearbox, so stand clear. Never fire without the paddle on.</li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<script>
+(function(){
+const D2R=Math.PI/180;
+// ---------- design constants ----------
+const K=5.709, T0=11.54, TS=15, ETA=0.95, IC=0.0228, IS=0.0002, IK=IC+IS, I_PAD=0.022, MP=0.35, LCG=0.25, G=9.81, TIP=0.406;
+const RATIO=10, ETA_G=0.85, R_TAB=67.1, TAB_ANG=153.4, STROKE=25, FT=STROKE/R_TAB/D2R, RPM_RESET=300;
+const LEG_RM=26, LEG_OFF=Math.atan(Math.sqrt(48*48-26*26)/26)/D2R, LEG_LEN=54, PIN_SIDE=9.5;
+const HOOK_OPEN=14, HORN_REL=70;
+const $=id=>document.getElementById(id);
+const fmt=(v,d=0)=>v.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const lerp=(a,b,u)=>a+(b-a)*u, ease=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+const P=(r,deg)=>[r*Math.sin(deg*D2R), r*Math.cos(deg*D2R)];
+const pt=p=>p[0].toFixed(1)+','+p[1].toFixed(1);
+const poly=pts=>'M'+pts.map(pt).join('L')+'Z';
+function arcPts(r,a0,a1,step=2){const n=Math.max(1,Math.ceil(Math.abs(a1-a0)/step)),o=[];for(let i=0;i<=n;i++)o.push(P(r,lerp(a0,a1,i/n)));return o;}
+
+// ---------- physics ----------
+const Vg=a=>MP*G*LCG*Math.cos(a*D2R);
+const Ework=e=>T0*e+0.5*K*e*e;               // spring work over e radians after pickup
+function omegaEnd(th0){const e=(th0-TS)*D2R,E=ETA*Ework(e),ws2=2*(E-(Vg(TS)-Vg(th0)))/IK;return Math.sqrt(Math.max(0,ws2-2*(Vg(0)-Vg(TS))/IC));}
+const alphaOf=th0=>{const w=omegaEnd(th0);return w*w/(2*th0*D2R)/D2R;};
+const AMAX=alphaOf(120);
+function thFor(al){let lo=TS+0.01,hi=120;for(let i=0;i<60;i++){const m=(lo+hi)/2;if(alphaOf(m)<al)lo=m;else hi=m;}return (lo+hi)/2;}
+function swing(th0){
+  const E0=ETA*Ework((th0-TS)*D2R);
+  const W=a=>{ if(a>=TS){const E=E0-ETA*Ework((a-TS)*D2R);return Math.sqrt(Math.max(0,2*(E-(Vg(a)-Vg(th0)))/IK));}
+    const ws2=2*(E0-(Vg(TS)-Vg(th0)))/IK; return Math.sqrt(Math.max(0,ws2-2*(Vg(a)-Vg(TS))/IC)); };
+  const n=900, Tst=ETA*T0, da=th0/n*D2R, out=[[0,th0,0]]; let t=0,wPrev=0;
+  for(let i=1;i<=n;i++){const a=th0*(1-i/n),w=W(a);t+= i===1?Math.sqrt(2*da*IK/Tst):da*0.5*(1/wPrev+1/w);wPrev=w;out.push([t,a,-w/D2R]);}
+  const w0=wPrev,tS=t,dec=w0*w0/(2*FT*D2R),ta=w0/dec;
+  for(let k=1;k<=30;k++){const s=ta*k/30;out.push([tS+s,-(w0*s-dec*s*s/2)/D2R,-(w0-dec*s)/D2R]);}
+  return {pts:out,tSwing:tS,tEnd:tS+ta,w0};
+}
+const springT=th=>th<TS?0:T0+K*(th-TS)*D2R;
+const rpmFor=tau=>Math.min(300,Math.max(60,300-(tau-1.5)/1.1*240));
+function cockStats(th0){let t=0,taum=0;const n=240;for(let i=0;i<n;i++){const a=th0*(i+0.5)/n;
+  const Tout=springT(a)/0.97+MP*G*LCG*Math.sin(a*D2R)*0+0.3;
+  const tau=Tout/RATIO/ETA_G;taum=Math.max(taum,tau);
+  t+=RATIO*(th0/n)/360/rpmFor(tau)*60;}
+  return {t,taum,turns:RATIO*th0/360};}
+function predict(al){const th0=thFor(al),r=swing(th0),w=r.w0,c=cockStats(th0);
+  return {th0,dps:w/D2R,tip:w*TIP,E:0.5*I_PAD*w*w,ms:r.tSwing*1000,T:springT(th0),tau:c.taum,turns:c.turns,tc:c.t,treset:c.turns/RPM_RESET*60};}
+
+// ---------- static geometry ----------
+const u=[88,72],ul=Math.hypot(...u),nx=-u[1]/ul*12,ny=u[0]/ul*12;
+$('armBar').setAttribute('d',poly([[nx,ny],[u[0]+nx,u[1]+ny],[u[0]-nx,u[1]-ny],[-nx,-ny]]));
+$('hookPath').setAttribute('d',poly([[-22.7,24.1],[-22.7,44.2],[-17,51.8],[-12,51.8],[-12,39.2],[-7.6,35.4],[7.6,35.4],[12.6,39.2],[12.6,53],[37.8,55.5],[94.5,55.5],[99.5,51.8],[99.5,41.7],[75.6,24.1]]));
+function legPath(c){const f=(c-LEG_OFF)*D2R,T=[LEG_RM*Math.sin(f),LEG_RM*Math.cos(f)],v=[Math.cos(f),-Math.sin(f)];return 'M'+pt(T)+'L'+pt([T[0]+LEG_LEN*v[0],T[1]+LEG_LEN*v[1]]);}
+const C_REST=180+TS+PIN_SIDE, C_ANCH=60;
+$('legA').setAttribute('d',legPath(C_ANCH));
+{const a=P(48,C_ANCH+9.5);$('anchorPost').setAttribute('cx',a[0].toFixed(1));$('anchorPost').setAttribute('cy',a[1].toFixed(1));
+ const s=P(31.6,C_REST-37);$('stopPost').setAttribute('cx',s[0].toFixed(1));$('stopPost').setAttribute('cy',s[1].toFixed(1));}
+const PHM=TAB_ANG-FT/2, M=P(R_TAB,PHM), U=[-Math.cos(PHM*D2R),Math.sin(PHM*D2R)], UANG=Math.atan2(U[1],U[0])/D2R;
+const tOf=th=>{const s=P(R_TAB,TAB_ANG+th);return (s[0]-M[0])*U[0]+(s[1]-M[1])*U[1];};
+const T_REST=tOf(0);
+$('absG').setAttribute('transform',`translate(${M[0].toFixed(2)},${M[1].toFixed(2)}) rotate(${UANG.toFixed(2)})`);
+
+// ---------- state ----------
+const st={phase:'rest',beta:0,theta:0,hook:0,horn:0,w:0,motor:'off',servo:'lock',AL:20000,loadedAL:20000,busy:false,clock:''};
+const PH={
+  rest:{name:'At rest',what:'Paddle vertical on the absorber cap. The hook on the drive arm holds the pin roller. The spring sits on its leg stop, preloaded, 15° away from the pin. Pick a setting, then cock.'},
+  armed:{name:'Cocked · holding',what:''},
+  fired:{name:'Fired · waiting to reset',what:''}
+};
+
+// ---------- render ----------
+const rotCW=(x,y,a)=>{const c=Math.cos(a*D2R),s=Math.sin(a*D2R);return [x*c+y*s,-x*s+y*c];};
+function render(){
+  const b=st.beta, th=st.theta;
+  $('armG').setAttribute('transform',`rotate(${(-(180+b)).toFixed(3)})`);
+  $('hookG').setAttribute('transform',`rotate(${st.hook.toFixed(2)},59.9,46.7)`);
+  $('hornG').setAttribute('transform',`rotate(${st.horn.toFixed(2)},94.5,71.9)`);
+  $('hubG').setAttribute('transform',`rotate(${(-th).toFixed(3)})`);
+  const c=Math.max(180+th,180+TS)+PIN_SIDE;
+  $('legM').setAttribute('d',legPath(c));
+  const tc=th<0?Math.max(T_REST,tOf(th)):T_REST;
+  $('absCap').setAttribute('x',tc.toFixed(2));$('absRod').setAttribute('x',(tc+8).toFixed(2));$('absRod').setAttribute('width',Math.max(1,40-tc-8).toFixed(2));
+  $('rMotor').innerHTML={fwd:'<span class="pill on">forward</span>',back:'<span class="pill on">back</span>',hold:'<span class="pill lock">holding, powered</span>',off:'<span class="pill off">idle</span>'}[st.motor];
+  $('rArm').textContent=b<0.05?'home':`${fmt(b,1)}° back`;
+  $('rServo').innerHTML=st.servo==='lock'?'<span class="pill lock">locked</span>':'<span class="pill hot">released</span>';
+  $('rPad').textContent=Math.abs(th)<0.05?'vertical':th>0?`${fmt(th,1)}° cocked`:`${fmt(-th,1)}° past vertical`;
+  $('rW').textContent=Math.abs(st.w)>1?`${fmt(Math.abs(st.w))} °/s`:'0 °/s';
+  $('rTip').textContent=Math.abs(st.w)>1?`${fmt(Math.abs(st.w)*D2R*TIP,1)} m/s`:'0 m/s';
+  const T=th>TS?springT(th):T0;
+  $('rSpring').textContent=th>TS?`${fmt(T,1)} N·m on the pin`:`${fmt(T0,1)} N·m on its stop`;
+  const sm=Math.max(0,tc-T_REST);
+  $('rAbs').textContent=sm>0.2?`${fmt(sm)} mm in`:'extended';
+  $('clock').textContent=st.clock;
+  drawBalloons();schematic();
+}
+function setEdge(id,cls,dir){$(id).setAttribute('class','sch-e'+(cls?(' '+cls):'')+(dir?(' flow'+(dir<0?' rev':'')):''));}
+function schematic(){
+  const ph=st.phase,cocking=ph==='cocking',reset=ph==='reset',firing=ph==='firing',armed=ph==='armed',engaged=st.theta>TS+0.05;
+  setEdge('eMS',(cocking||reset||armed)?'act':'',cocking?1:reset?-1:0);
+  setEdge('eSW',(cocking||reset||armed)?'act':'',cocking?1:reset?-1:0);
+  setEdge('eWH',(cocking||armed)?'act':'',cocking?1:0);
+  setEdge('eVH',firing&&st.servo==='rel'?'st-act':'',firing?1:0);
+  setEdge('eHP',(cocking||armed)?'act':'',cocking?1:0);
+  setEdge('eSP',engaged?'en-act':'',firing&&engaged?1:cocking&&engaged?-1:0);
+  setEdge('ePA',st.theta<-0.2?'act':'',st.theta<-0.2?1:0);
+  ['nM','nS','nW','nV','nH','nT','nP','nA'].forEach(id=>$(id).classList.remove('act'));
+  if(cocking||reset||armed){['nM','nS','nW'].forEach(id=>$(id).classList.add('act'));}
+  if(cocking||armed){$('nH').classList.add('act');$('nP').classList.add('act');}
+  if(engaged)$('nT').classList.add('act');
+  if(firing){$('nV').classList.add('act');$('nP').classList.add('act');}
+  if(st.theta<-0.2)$('nA').classList.add('act');
+}
+function sweeps(th0){
+  const wedge=(a0,a1)=>'M0,0L'+arcPts(406,a0,a1).map(pt).join('L')+'Z';
+  $('sweepA').setAttribute('d',wedge(0,th0));$('sweepB').setAttribute('d',wedge(-FT,0));
+  $('sweepTx').textContent=`SHADED: SWING FROM ${fmt(th0,1)}° TO VERTICAL · DOTTED: ${FT.toFixed(0)}° FOLLOW-THROUGH INTO THE ABSORBER`;
+}
+
+// ---------- balloons: f fixed, a drive arm, h paddle hub ----------
+const BAL=[[1,P(31,320)[0],P(31,320)[1],-165,120,'f'],[2,P(48,69.5)[0],P(48,69.5)[1],195,110,'f'],[3,0,0,-165,60,'f'],[4,15,-10,-165,0,'a'],
+ [5,40,33,-165,-60,'a'],[10,59.9,46.7,-165,-120,'a'],[9,93,72,-120,-185,'a'],[8,0,-48,-30,-195,'h'],[7,8,-6,60,-195,'h'],[6,16,-30,140,-180,'h'],
+ [11,0,0,195,-40,'abs'],[13,150,-110,195,-110,'f'],[12,13,115,100,155,'h']];
+function drawBalloons(){let s='';
+  for(const [n,x0,y0,bx,by,fr] of BAL){
+    let tx=x0,ty=y0;
+    if(fr==='a'){[tx,ty]=rotCW(x0,y0,180+st.beta);}
+    else if(fr==='h'){[tx,ty]=rotCW(x0,y0,st.theta);}
+    else if(fr==='abs'){tx=M[0]+90*U[0];ty=M[1]+90*U[1];}
+    const dx=tx-bx,dy=ty-by,dd=Math.hypot(dx,dy),ux=dx/dd,uy=dy/dd;
+    s+=`<g class="balloon"><line x1="${(bx+ux*12).toFixed(1)}" y1="${(-(by+uy*12)).toFixed(1)}" x2="${tx.toFixed(1)}" y2="${(-ty).toFixed(1)}"/><circle cx="${tx.toFixed(1)}" cy="${(-ty).toFixed(1)}" r="1.8" fill="var(--ink)"/><circle cx="${bx}" cy="${-by}" r="12"/><text x="${bx}" y="${-by}">${n}</text></g>`;}
+  $('balloons').innerHTML=s;}
+$('showBal').addEventListener('change',e=>{$('balloons').style.display=e.target.checked?'':'none';});
+
+// ---------- slider, tables ----------
+$('accel').max=Math.round(AMAX/100)*100;
+$('hdrA').textContent=`7,000–${fmt(Math.round(AMAX/100)*100)} °/s²`;
+function updateAccel(){
+  st.AL=+$('accel').value;$('aVal').textContent=fmt(st.AL);
+  const pr=predict(st.AL);
+  $('pTip').textContent=`${fmt(pr.tip,1)} m/s`;$('pTh').textContent=`${fmt(pr.th0,1)}°`;
+  $('pW').textContent=`${fmt(pr.dps)} °/s`;$('pE').textContent=`${fmt(pr.E,1)} J`;
+  $('pT').textContent=`${fmt(pr.ms,1)} ms`;$('pSp').textContent=`${fmt(pr.T,1)} N·m`;
+  $('pTau').textContent=`${fmt(pr.tau,2)} N·m`;$('pC').textContent=`${fmt(pr.tc,1)} s`;
+  if(st.phase==='rest')sweeps(pr.th0);
+  updateButtons();
+}
+$('accel').addEventListener('input',updateAccel);
+(function(){let s='';const rows=[7000,10000,15000,20000,25000,30000,AMAX];const lo=predict(7000),hi=predict(AMAX*0.9999);
+  for(const al of rows){const p=predict(al===AMAX?AMAX*0.9999:al);
+  s+=`<tr><td class="num">${fmt(Math.round(al/100)*100)} °/s²</td><td class="num">${fmt(p.tip,1)} m/s</td><td class="num">${fmt(p.th0,1)}°</td><td class="num">${fmt(p.dps)} °/s</td><td class="num">${fmt(p.E,1)} J</td><td class="num">${fmt(p.ms,1)} ms</td><td class="num">${fmt(p.T,1)} N·m</td><td class="num">${fmt(p.tau,2)} N·m</td><td class="num">${fmt(p.turns,2)}</td><td class="num">${fmt(p.tc,1)} s</td></tr>`;}
+  $('eTable').querySelector('tbody').innerHTML=s;
+  $('fwCock').textContent=`${fmt(lo.turns,2)}–${fmt(hi.turns,2)}`;
+  $('fwCockT').textContent=`${fmt(lo.tc,1)}–${fmt(hi.tc,1)} s`;
+  $('fwResetT').textContent=`${fmt(lo.treset,1)}–${fmt(hi.treset,1)} s at ${RPM_RESET} rpm`;
+})();
+const BOM=[
+ ['Gearbox (not counted)'],
+ ['—','10:1 worm gearbox','NMRV040 size (rated about 30 N·m at 10:1) with a NEMA 23 input flange and an 18 mm keyed output. The top setting peaks at 22 N·m','1',75,'x'],
+ ['Store the energy'],
+ [1,'Torsion spring','About 0.88 in-lb per degree (0.10 N·m/°), rated for at least 240° of deflection and 200 in-lb, left-hand wound, coil ID over 20 mm, about 60 mm OD','1',25,'s'],
+ [2,'Anchor post and leg stop','Two M12 class 10.9 bolts into a small steel plate under the gearbox face bolts. The leg stop reaches 66 mm forward and carries the 11.5 N·m preload','1',6,'m'],
+ ['Drive and release'],
+ [3,'Long output shaft','18 mm keyed plug-in shaft for the gearbox, about 140 mm out the front, drilled and tapped M6 in its end','1',12,'s'],
+ [4,'Arm flange','18 mm keyed rigid flange coupling half, with set screw','1',9,'s'],
+ [5,'Arm and hook stock','¼ × 2 in steel flat bar, 12 in: the arm and the hook','1',8,'m'],
+ [9,'Servo','MG996R metal-gear servo, 6 V, on the arm. Carries about 20 N radially when cocked','1',8,'s'],
+ [10,'Hook pivot and spring','M6 shoulder bolt and nyloc nut; light extension spring that pulls the hook shut','1',3,'s'],
+ ['Carry the paddle'],
+ [6,'Hub block','1 × 1½ × 6 in aluminum bar cut to 130 mm, with a steel stop tab screwed to one end','1',10,'m'],
+ [7,'Bushings','Two oil-bronze flanged bushings, 18 mm bore, 22 mm OD','2',6,'s'],
+ [8,'Pin and roller','M10 × 70 class 12.9 shoulder bolt; 6200-2RS ball bearing as the roller the hook grabs','1',5,'s'],
+ [12,'Paddle clamps','Two stainless hose clamps sized to the paddle handle','2',2,'s'],
+ ['Stop and mount'],
+ [11,'Absorber','AC2525 hydraulic buffer, M25×1.5, 25 mm stroke, with an L bracket','1',14,'s'],
+ [13,'Board','¾ in plywood, 2 × 2 ft, plus a foot','1',12,'m'],
+ [14,'Fasteners','Gearbox bolts, washers, M6 retaining bolt, wood screws','1',8,'s']
+];
+(function(){let s='',tot=0;
+  for(const r of BOM){
+    if(r.length===1){s+=`<tr class="grp"><td colspan="6">${r[0]}</td></tr>`;continue;}
+    const [n,part,spec,q,price,stt]=r;if(stt!=='x')tot+=price;
+    const tag=stt==='x'?'<span class="tag s">not counted</span>':stt==='m'?'<span class="tag m">make</span>':'<span class="tag s">spec</span>';
+    s+=`<tr><td>${n==='—'?'':`<span class="bal">${n}</span>`}</td><td><b>${part}</b></td><td>${spec}</td><td class="num">${q}</td><td class="num">${stt==='x'?'('+price+')':price}</td><td>${tag}</td></tr>`;}
+  s+=`<tr class="tot"><td></td><td colspan="3">Estimated total</td><td class="num">$${Math.round(tot)}</td><td></td></tr>`;
+  s+=`<tr><td></td><td colspan="3">Including the gearbox</td><td class="num">$${Math.round(tot+75)}</td><td></td></tr>`;
+  $('bom').querySelector('tbody').innerHTML=s;})();
+
+// ---------- animation ----------
+function tween(dur,fn){return new Promise(res=>{const t0=performance.now();const step=now=>{const v=Math.min(1,(now-t0)/dur);fn(v);render();if(v<1)requestAnimationFrame(step);else res();};requestAnimationFrame(step);});}
+const SLOWDOWN=1.5;
+function setPhase(ph){st.phase=ph;const p=PH[ph];if(p){$('stName').textContent=p.name;if(p.what)$('stWhat').textContent=p.what;}}
+function busy(b,label,what){st.busy=b;if(b){$('stName').textContent=label;$('stWhat').textContent=what;}updateButtons();}
+async function doCock(){
+  const pr=predict(st.AL),th0=pr.th0;st.loadedAL=st.AL;sweeps(th0);
+  st.phase='cocking';busy(true,'Cocking',`NEMA 23 back ${fmt(pr.turns,2)} turns. The hook drags the paddle; after 15° the pin lifts the spring leg off its stop and winds it.`);
+  st.motor='back';
+  await tween(Math.max(900,pr.tc*1000*SLOWDOWN),v=>{st.beta=th0*v;st.theta=st.beta;st.clock=`step 1 · ${fmt(pr.tc*v,1)} s of ${fmt(pr.tc,1)} s`;});
+  st.motor='hold';st.clock='';
+  PH.armed.what=`Paddle ${fmt(th0,1)}° back, spring at ${fmt(springT(th0),1)} N·m. The powered motor holds the arm and the hook holds the paddle. Fire when ready.`;
+  setPhase('armed');busy(false);render();
+}
+async function doFire(){
+  const th0=st.theta;st.phase='firing';busy(true,'Firing','Servo swings its roller off the hook tail.');
+  st.servo='rel';
+  await tween(120,v=>{st.horn=HORN_REL*v;});
+  await tween(50,v=>{st.hook=HOOK_OPEN*v;});
+  const r=swing(th0),slow=+$('slow').value,pts=r.pts;
+  $('stName').textContent='Swinging';$('stWhat').textContent=slow>1?`Shown ${slow}× slower than real.`:'Real time.';
+  const gh=$('ghosts');gh.innerHTML='';let last=-1;
+  await tween(Math.max(80,r.tEnd*1000*slow),v=>{
+    const t=v*r.tEnd;let i=0;while(i<pts.length-1&&pts[i+1][0]<t)i++;
+    const A=pts[i],B=pts[Math.min(i+1,pts.length-1)],f=B[0]>A[0]?(t-A[0])/(B[0]-A[0]):0;
+    st.theta=lerp(A[1],B[1],f);st.w=lerp(A[2],B[2],f);
+    st.clock=`${fmt(t*1000,1)} ms after release`;
+    const gk=Math.floor(t*1000/4);
+    if(gk!==last&&t<r.tSwing){last=gk;const g=document.createElementNS('http://www.w3.org/2000/svg','rect');g.setAttribute('class','ghost');g.setAttribute('x',-7);g.setAttribute('y',25);g.setAttribute('width',14);g.setAttribute('height',380);g.setAttribute('rx',6);g.setAttribute('transform',`rotate(${(-st.theta).toFixed(2)})`);gh.appendChild(g);}
+  });
+  st.w=0;
+  const msg=`Tip reached ${fmt(r.w0*TIP,1)} m/s (${fmt(r.w0/D2R)} °/s) at vertical, ${fmt(r.tSwing*1000,1)} ms after release. The spring leg landed back on its stop 15° before vertical; the absorber took the paddle ${FT.toFixed(0)}° past.`;
+  const a1=st.theta;
+  await tween(600,v=>{st.theta=lerp(a1,0,ease(v));st.clock='absorber pushes the paddle back';});
+  st.theta=0;st.clock='';$('ghosts').innerHTML='';
+  st.motor='hold';
+  PH.fired.what=msg+' Reset brings the arm and hook back.';setPhase('fired');busy(false);render();
+}
+async function doReset(){
+  const b0=st.beta,turns=RATIO*b0/360,real=turns/RPM_RESET*60;
+  st.phase='reset';busy(true,'Resetting','NEMA 23 forward. The arm swings back to the paddle and the hook rides over the pin roller.');
+  st.motor='fwd';
+  await tween(Math.max(700,real*1000*SLOWDOWN),v=>{st.beta=b0*(1-v);st.hook=st.beta<5?HOOK_OPEN*st.beta/5:HOOK_OPEN;st.clock=`step 3 · ${fmt(real*v,1)} s of ${fmt(real,1)} s`;});
+  st.beta=0;st.hook=0;st.motor='off';
+  await tween(200,v=>{st.horn=HORN_REL*(1-v);});
+  st.servo='lock';st.clock='';setPhase('rest');busy(false);updateAccel();render();
+}
+function updateButtons(){
+  const b=st.busy,ph=st.phase,can={cock:!b&&ph==='rest',fire:!b&&ph==='armed',reset:!b&&ph==='fired'};
+  $('bCock').disabled=!can.cock;$('bFire').disabled=!can.fire;$('bReset').disabled=!can.reset;
+  ['bCock','bFire','bReset'].forEach(id=>$(id).classList.remove('next'));
+  const nx=ph==='rest'?'bCock':ph==='armed'?'bFire':ph==='fired'?'bReset':null;
+  if(nx&&!b)$(nx).classList.add('next');
+  $('bAuto').disabled=b;
+  const pr=predict(st.AL);
+  $('dCock').textContent=`NEMA 23 · ${fmt(pr.turns,2)} turns`;
+  $('dReset').textContent=ph==='fired'?`NEMA 23 · ${fmt(RATIO*st.beta/360,2)} turns`:'NEMA 23 · arm home';
+  $('hint').textContent=(!b&&(ph==='armed'||ph==='fired')&&st.AL!==st.loadedAL)?`Loaded for ${fmt(st.loadedAL)} °/s². The new setting applies to the next cock.`:'';
+}
+$('bCock').onclick=()=>doCock();$('bFire').onclick=()=>doFire();$('bReset').onclick=()=>doReset();
+$('bAuto').onclick=async()=>{
+  if(st.phase==='armed'){await doFire();await doReset();return;}
+  if(st.phase==='fired'){await doReset();}
+  await doCock();await doFire();await doReset();
+};
+setPhase('rest');updateAccel();render();
+})();
+</script>
+
+</body></html>
