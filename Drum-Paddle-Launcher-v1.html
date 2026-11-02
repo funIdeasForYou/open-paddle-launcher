@@ -1,0 +1,661 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}
+img{max-width:100%}
+[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Drum Paddle Launcher</title>
+<style>:root{
+  --paper:#ECEFEB; --sheet:#F8FAF7; --ink:#16222A; --ink2:#4A5960; --rule:#C2CBC5; --faint:#DCE2DD; --wash:#E3E8E3;
+  --drive:#2A5B89; --paddle:#A97A35; --energy:#C2451A; --stop:#2B7655; --absorb:#6650A3; --steel:#78858B; --steel2:#AEB8BB; --wood:#D9C9A8; --lumber:#C9A979;
+  --on:#2B7655; --off:#8A969B; --hot:#C2451A;
+  --f-display:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#101518; --sheet:#171E23; --ink:#DCE4E7; --ink2:#9AA8AE; --rule:#2F3B42; --faint:#253037; --wash:#1C252B;
+  --drive:#73A8D8; --paddle:#D3A762; --energy:#F07B4C; --stop:#5DBE8F; --absorb:#A897E2; --steel:#8E9BA1; --steel2:#56636A; --wood:#4A4130; --lumber:#6A5638;
+  --on:#5DBE8F; --off:#6E7C83; --hot:#F07B4C; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#101518; --sheet:#171E23; --ink:#DCE4E7; --ink2:#9AA8AE; --rule:#2F3B42; --faint:#253037; --wash:#1C252B;
+  --drive:#73A8D8; --paddle:#D3A762; --energy:#F07B4C; --stop:#5DBE8F; --absorb:#A897E2; --steel:#8E9BA1; --steel2:#56636A; --wood:#4A4130; --lumber:#6A5638;
+  --on:#5DBE8F; --off:#6E7C83; --hot:#F07B4C; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;letter-spacing:.01em;text-wrap:balance;margin:0}
+h1{font-size:clamp(26px,3.4vw,38px);line-height:1.05}
+h2{font-size:22px}
+h3{font-size:15px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);font-weight:600}
+p{margin:0}
+header{display:flex;flex-direction:column;gap:10px;border-bottom:2px solid var(--ink);padding-bottom:14px}
+.titlerow{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 20px}
+.dwg{font-family:var(--f-mono);font-size:12px;color:var(--ink2);letter-spacing:.04em}
+.lede{max-width:80ch;color:var(--ink2)}
+.lede a{color:var(--drive)}
+.specs{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--f-mono);font-size:13px}
+.specs b{font-weight:500;color:var(--ink)}
+.specs span{color:var(--ink2)}
+.card{background:var(--sheet);border:1px solid var(--rule);border-radius:4px}
+.drawing{padding:10px 10px 6px;min-width:0}
+.scroller{overflow-x:auto}
+.drawing svg{display:block;width:100%;height:auto}
+.views{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(0,1fr);gap:10px;align-items:start}
+@media (max-width:980px){.views{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:700px){#main{min-width:680px}}
+#detailWrap{border-left:1px solid var(--rule);padding-left:10px;display:flex;flex-direction:column;gap:8px}
+@media (max-width:980px){#detailWrap{border-left:0;border-top:1px solid var(--rule);padding-left:0;padding-top:8px}}
+.dnote{font-size:13px;color:var(--ink2)}
+.dwgbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding:6px 6px 2px;font-size:13px;color:var(--ink2)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+label.tog{display:inline-flex;gap:6px;align-items:center;cursor:pointer;user-select:none}
+.panel2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px 26px;padding:16px}
+.panel2>div{display:flex;flex-direction:column;gap:14px;min-width:0}
+@media (max-width:820px){.panel2{grid-template-columns:minmax(0,1fr)}}
+.kk{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2)}
+.state{display:flex;flex-direction:column;gap:4px;padding-bottom:12px;border-bottom:1px solid var(--rule)}
+.state .name{font-family:var(--f-display);font-size:24px;font-weight:600;line-height:1.1}
+.state .what{color:var(--ink2);font-size:14px;min-height:4.5em}
+.energy{display:flex;flex-direction:column;gap:6px}
+.energy .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.energy .big{font-family:var(--f-display);font-size:30px;font-weight:600;line-height:1}
+.energy .big small{font-size:16px;color:var(--ink2);font-weight:500}
+input[type=range]{width:100%;accent-color:var(--energy)}
+.pred{font-family:var(--f-mono);font-size:12.5px;color:var(--ink2);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 10px}
+.pred b{color:var(--ink);font-weight:500}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.steps button{all:unset;box-sizing:border-box;cursor:pointer;border:1.5px solid var(--rule);border-radius:4px;padding:8px 10px;display:flex;flex-direction:column;gap:1px;background:var(--sheet);min-width:0}
+.steps button .n{font-family:var(--f-display);font-weight:600;font-size:17px}
+.steps button .d{font-family:var(--f-mono);font-size:11.5px;color:var(--ink2)}
+.steps button[disabled]{opacity:.42;cursor:not-allowed}
+.steps button.next{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.steps button:focus-visible,.runrow button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--drive);outline-offset:2px}
+.runrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.runrow button{all:unset;box-sizing:border-box;cursor:pointer;background:var(--ink);color:var(--sheet);font-family:var(--f-display);font-weight:600;font-size:16px;padding:8px 14px;border-radius:4px}
+.runrow button[disabled]{opacity:.45;cursor:not-allowed}
+.runrow select{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--rule);border-radius:4px;background:var(--sheet);color:var(--ink)}
+.hint{font-size:13px;color:var(--ink2);min-height:1.3em}
+.read{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.read .cell{border-top:1px solid var(--rule);padding-top:6px;min-width:0}
+.read .v{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:12px;font-weight:500;padding:1px 7px;border-radius:999px;border:1px solid currentColor}
+.pill.on{color:var(--on)}
+.pill.off{color:var(--off)}
+.pill.hot{color:var(--hot)}
+.pill.lock{color:var(--drive)}
+.schem svg{display:block;width:100%;height:auto}
+section{display:flex;flex-direction:column;gap:12px}
+.sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 16px;border-bottom:1px solid var(--ink);padding-bottom:6px}
+.sec-head p{color:var(--ink2);font-size:14px;max-width:76ch}
+.tbl{overflow-x:auto;border:1px solid var(--rule);border-radius:4px;background:var(--sheet)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--faint);vertical-align:top}
+th{font-family:var(--f-display);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);background:var(--wash);white-space:nowrap}
+td.num,th.num{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.seq{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+@media (max-width:1000px){.seq{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.seq{grid-template-columns:minmax(0,1fr)}}
+.seq .card{padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.seq .card b{font-family:var(--f-display);font-size:17px;font-weight:600}
+.seq .card p{font-size:14px;color:var(--ink2)}
+.cl{fill:none;stroke:var(--steel);stroke-width:.7;stroke-dasharray:14 3 2 3}
+.board{fill:color-mix(in srgb,var(--wood) 55%,var(--sheet));stroke:color-mix(in srgb,var(--wood) 80%,var(--ink));stroke-width:1}
+.lum{fill:color-mix(in srgb,var(--lumber) 70%,var(--sheet));stroke:color-mix(in srgb,var(--lumber) 70%,var(--ink));stroke-width:1}
+.ply{fill:color-mix(in srgb,var(--wood) 80%,var(--sheet));stroke:color-mix(in srgb,var(--wood) 70%,var(--ink));stroke-width:1}
+.plate{fill:color-mix(in srgb,var(--wood) 30%,transparent);stroke:color-mix(in srgb,var(--wood) 60%,var(--ink));stroke-width:1.2;stroke-dasharray:8 4}
+.stl{fill:var(--steel2);stroke:var(--steel);stroke-width:1}
+.alu{fill:color-mix(in srgb,var(--steel2) 45%,var(--sheet));stroke:var(--steel);stroke-width:1.1}
+.see{fill:color-mix(in srgb,var(--steel2) 35%,transparent);stroke:var(--ink2);stroke-width:1.2}
+.pulley{fill:color-mix(in srgb,var(--steel2) 22%,transparent);stroke:var(--ink2);stroke-width:1.3}
+.groove{fill:none;stroke:var(--ink2);stroke-width:.8;stroke-dasharray:3 3}
+.drv{fill:color-mix(in srgb,var(--drive) 22%,var(--sheet));stroke:var(--drive);stroke-width:1.3}
+.motor{fill:color-mix(in srgb,var(--drive) 45%,var(--sheet));stroke:var(--drive);stroke-width:1.3}
+.pad{fill:color-mix(in srgb,var(--paddle) 50%,var(--sheet));stroke:var(--paddle);stroke-width:1.4;fill-opacity:.7}
+.sweep{fill:color-mix(in srgb,var(--paddle) 10%,transparent);stroke:var(--paddle);stroke-width:.8;stroke-dasharray:5 4}
+.ghost{fill:none;stroke:var(--paddle);stroke-width:1;opacity:.3}
+.spr{fill:none;stroke:var(--energy);stroke-width:2;stroke-linejoin:round}
+.cord{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:round}
+.cord.slack{stroke-dasharray:5 3;stroke:var(--ink2)}
+.cordh{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-dasharray:3 3;opacity:.7}
+.eq{fill:var(--steel2);stroke:var(--ink);stroke-width:1.2}
+.pad2{fill:var(--ink);stroke:none}
+.hookO{fill:none;stroke:var(--stop);stroke-width:25.4;stroke-linecap:round;stroke-linejoin:round}
+.hookI{fill:none;stroke:color-mix(in srgb,var(--stop) 30%,var(--sheet));stroke-width:22.6;stroke-linecap:round;stroke-linejoin:round}
+.servo{fill:none;stroke:var(--stop);stroke-width:1.2;stroke-dasharray:4 3}
+.horn{fill:none;stroke:var(--stop);stroke-width:5;stroke-linecap:round}
+.roll{fill:color-mix(in srgb,var(--steel2) 60%,var(--sheet));stroke:var(--ink2);stroke-width:1.1}
+.bolt{fill:var(--steel2);stroke:var(--ink2);stroke-width:1}
+.abs{fill:color-mix(in srgb,var(--absorb) 25%,var(--sheet));stroke:var(--absorb);stroke-width:1.3}
+.flash{fill:var(--hot);opacity:0}
+.hookE{fill:color-mix(in srgb,var(--stop) 30%,var(--sheet));stroke:var(--stop);stroke-width:1.2}
+.tx{font-family:var(--f-mono);font-size:11px;fill:var(--ink2)}
+.vlbl{font-family:var(--f-mono);font-size:10.5px;fill:var(--ink2);letter-spacing:.04em}
+.vtitle{font-family:var(--f-display);font-size:15px;font-weight:600;fill:var(--ink);letter-spacing:.06em}
+.ld{stroke:var(--ink2);stroke-width:.7;fill:none}
+.lbl{font-family:var(--f-mono);font-size:10.5px;fill:var(--ink)}
+.dim{stroke:var(--ink2);stroke-width:.8;fill:none}
+.balloon circle{fill:var(--sheet);stroke:var(--ink);stroke-width:1.1}
+.balloon text{font-family:var(--f-mono);font-size:11px;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.balloon line{stroke:var(--ink);stroke-width:.7}
+.balloon.own circle{stroke-dasharray:3 2}
+.flow{stroke-dasharray:5 4;animation:flow .6s linear infinite}
+.flow.rev{animation-direction:reverse}
+@keyframes flow{to{stroke-dashoffset:-9}}
+@media (prefers-reduced-motion:reduce){.flow{animation:none}}
+.sch-box{fill:var(--sheet);stroke:var(--rule);stroke-width:1.2}
+.sch-box.act{stroke:var(--ink);stroke-width:1.6}
+.sch-t{font-family:var(--f-display);font-size:12px;font-weight:600;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.sch-s{font-family:var(--f-mono);font-size:9.5px;fill:var(--ink2);text-anchor:middle}
+.sch-e{fill:none;stroke:var(--rule);stroke-width:2.2}
+.sch-e.act{stroke:var(--drive)}
+.sch-e.en-act{stroke:var(--energy)}
+.sch-e.st-act{stroke:var(--stop)}
+.sch-e.ab-act{stroke:var(--absorb)}</style>
+
+<div class="wrap">
+<header>
+  <div class="titlerow">
+    <h1>Paddle launcher v1, option 2: drum and extension springs</h1>
+    <div class="dwg">DWG PL-02 · PLAN + SIDE VIEW · MM · PADDLE SWINGS FLAT</div>
+  </div>
+  <p class="lede">Two extension springs lie flat behind the shaft and pull a cord wrapped on a 5 in V-pulley. The pulley is bolted into the paddle hub. The release is the same as in the compact launcher: the drive arm keyed to the gearbox drags the hub back with a hook, and a servo opens the hook to fire. Item numbers match the option 2 bill of materials in the v1 PDF.</p>
+  <div class="specs">
+    <span>Tip speed <b>3.0–20 m/s</b></span><span>Average acceleration <b id="hdrA">7,000–33,200 °/s²</b></span><span>Cock angle <b>13°–120°</b></span><span>Height <b>24 cm</b></span><span>Base <b>14 × 37 in</b></span><span>Springs <b>2 × Century 660CS</b></span>
+  </div>
+</header>
+
+<div class="card drawing">
+  <div class="views">
+    <div class="scroller">
+    <svg id="main" viewBox="-450 -440 1250 990" role="img" aria-label="Plan view of the option 2 launcher from above, with the side view projected underneath, animated">
+            <g id="lowL" transform="matrix(0,-1,-1,0,0,0)">
+        <rect class="board" x="-178" y="-765" width="356" height="939"></rect>
+        <path id="sweepA" class="sweep" d=""></path>
+        <path id="sweepB" class="sweep" d="" style="stroke-dasharray:2 3"></path>
+        <line class="cl" x1="0" y1="-760" x2="0" y2="420"></line>
+        <line class="cl" x1="-170" y1="0" x2="420" y2="0"></line>
+        <path id="motorP" class="motor" d=""></path>
+        <path id="flangeP" class="drv" d=""></path>
+        <rect class="drv" x="-40" y="-40" width="80" height="80" rx="6"></rect>
+                <rect class="lum" x="-144" y="-748.0" width="178" height="38.1"></rect>
+        <g id="eyes"></g>
+        <rect class="lum" x="-74.05" y="-280.25" width="38.1" height="88.9"></rect>
+        <rect class="pad2" x="-74.05" y="-193.35" width="38.1" height="2"></rect><rect id="padFlash" class="flash" x="-80" y="-196" width="50" height="8"></rect>
+        <path id="spr0" class="spr" d=""></path>
+        <path id="spr1" class="spr" d=""></path>
+        <g id="links"></g>
+        <rect id="eqP" class="eq" x="-118.5" y="-191.35" width="127" height="6.35"></rect>
+        <rect class="lum" x="40.95" y="-234.45" width="38.1" height="88.9"></rect>
+                <g id="armG">
+          <path id="armP" class="drv" d="" style="fill-opacity:.85"></path>
+          <circle r="7" class="stl"></circle>
+          <path id="servoP" class="servo" d=""></path>
+          <g id="hookG">
+            <path id="hookO" class="hookO" d=""></path><path id="hookI" class="hookI" d=""></path>
+            <circle id="rollP" class="roll" r="11"></circle>
+            <circle id="pivP" class="bolt" r="6.5"></circle>
+          </g>
+          <g id="hornG"><path id="hornP" class="horn" d=""></path><circle id="hornC" class="bolt" r="4.5"></circle></g>
+        </g>
+                <g id="hubLow">
+          <rect class="alu" x="-19.05" y="-36" width="38.1" height="72"></rect>
+          <rect class="stl" x="-12.7" y="-42.35" width="25.4" height="6.35"></rect>
+          <circle r="9" class="bolt" style="fill:color-mix(in srgb,var(--paddle) 40%,var(--sheet))"></circle>
+          <circle cx="0" cy="25" r="3.3" class="bolt"></circle><circle cx="0" cy="-25" r="3.3" class="bolt"></circle>
+        </g>
+      </g>
+      <g id="highL" transform="matrix(0,-1,-1,0,0,0)">
+        <g id="ghosts"></g>
+        <g id="hubHigh">
+          <path id="paddleP" class="pad" d=""></path>
+          <rect class="alu" x="-19.05" y="-36" width="38.1" height="152" style="fill-opacity:.9"></rect>
+          <rect class="stl" x="-47" y="69" width="68" height="12" style="fill-opacity:.5"></rect>
+          <rect class="stl" x="-47" y="99" width="68" height="12" style="fill-opacity:.5"></rect>
+          <circle class="pulley" r="63.5"></circle>
+          <circle class="groove" r="54"></circle>
+          <circle id="knotP" r="3.5" fill="var(--ink)"></circle>
+          <rect class="see" x="-19.05" y="-87" width="38.1" height="123"></rect>
+          <circle r="11" class="bolt" style="fill:color-mix(in srgb,var(--paddle) 40%,var(--sheet))"></circle>
+          <circle cx="0" cy="25" r="6" class="bolt"></circle><circle cx="0" cy="-25" r="6" class="bolt"></circle>
+        </g>
+        <path id="cordWrap" class="cordh" d=""></path>
+        <path id="cordP" class="cord" d=""></path>
+                <rect class="ply" x="130.05" y="-115" width="38.1" height="80"></rect>
+        <rect class="abs" x="52.05" y="-87.5" width="123" height="25"></rect>
+        <rect class="abs" x="125.05" y="-92" width="5" height="34"></rect><rect class="abs" x="168.15" y="-92" width="5" height="34"></rect>
+        <rect id="absRod" class="stl" x="27.05" y="-78.5" width="25" height="7"></rect>
+        <rect id="absCap" class="abs" x="20.05" y="-84" width="7" height="18" rx="2"></rect>
+        <rect class="plate" x="-45" y="-240" width="217" height="285"></rect>
+        <circle r="15" class="stl" style="fill-opacity:.6"></circle><circle r="7" class="stl"></circle>
+      </g>
+      <g id="balloons"></g>
+      <text class="vtitle" x="-440" y="-418">PLAN · FROM ABOVE</text>
+      <text class="vlbl" x="-440" y="-402">Parts above the paddle drawn see-through. Front is to the left.</text>
+      <text id="sweepTx" class="vlbl" x="-440" y="-386"></text>
+      <text id="clock" class="tx" x="790" y="-418" text-anchor="end" style="font-size:12px"></text>
+
+            <g id="elev" transform="translate(0,410)">
+        <text class="vtitle" x="-440" y="-190">SIDE VIEW · FROM THE LEFT</text>
+        <rect class="board" x="-174" y="63.05" width="939" height="19.05"></rect>
+        <rect class="motor" x="-131" y="3" width="100" height="57"></rect>
+        <rect class="drv" x="-40" y="0" width="80" height="63.05"></rect>
+        <line class="cl" x1="0" y1="90" x2="0" y2="-170"></line>
+        <rect class="lum" x="145.55" y="-122" width="88.9" height="185.05"></rect>
+        <rect class="ply" x="35" y="-122" width="80" height="41.7"></rect>
+        <circle class="abs" cx="75" cy="-101" r="12.5"></circle>
+        <g id="elMove"></g>
+        <rect class="lum" x="191.35" y="-101.9" width="88.9" height="165"></rect>
+        <rect class="pad2" x="189.35" y="-98" width="2" height="38"></rect><rect id="elFlash" class="flash" x="186" y="-104" width="8" height="50"></rect>
+        <rect class="lum" x="710" y="-121.15" width="38.1" height="184.2"></rect>
+        <rect class="ply" x="-45" y="-141.05" width="285" height="19.05" style="fill-opacity:.85"></rect>
+        <rect class="stl" x="-15" y="-154.5" width="30" height="11"></rect>
+        <rect class="stl" x="-7" y="-155" width="14" height="200" style="fill-opacity:.35"></rect>
+                <g>
+          <path class="dim" d="M-440,82.1 H-430 M-440,-155 H-430 M-435,82.1 V-155"></path>
+          <text class="lbl" x="-428" y="-2">237 mm</text>
+          <text class="lbl" x="-428" y="12">(9.3 in) tall</text>
+          <line class="ld" x1="-30" y1="-131" x2="-90" y2="-175"></line><text class="lbl" x="-95" y="-178" text-anchor="end">Top plate (3)</text>
+          <line class="ld" x1="75" y1="-114" x2="60" y2="-175"></line><text class="lbl" x="40" y="-178">Absorber, end-on (26)</text>
+          <line class="ld" x1="-60" y1="-105" x2="-150" y2="-140"></line><text class="lbl" x="-155" y="-140" text-anchor="end">Stop block (16)</text>
+          <line class="ld" x1="-50" y1="-82" x2="-150" y2="-108"></line><text class="lbl" x="-155" y="-106" text-anchor="end">Pulley drum (15)</text>
+          <line class="ld" x1="-100" y1="-58" x2="-150" y2="-80"></line><text class="lbl" x="-155" y="-77" text-anchor="end">Paddle hub + paddle</text>
+          <line class="ld" x1="-20" y1="-38" x2="-150" y2="-30"></line><text class="lbl" x="-155" y="-27" text-anchor="end">Rear block + lug</text>
+          <line class="ld" x1="-60" y1="-8" x2="-150" y2="-6"></line><text class="lbl" x="-155" y="-3" text-anchor="end">Drive arm + hook</text>
+          <line class="ld" x1="-80" y1="30" x2="-150" y2="22"></line><text class="lbl" x="-155" y="26" text-anchor="end">NEMA 23 + gearbox</text>
+          <line class="ld" x1="190" y1="-122" x2="250" y2="-170"></line><text class="lbl" x="255" y="-172">Post (2)</text>
+          <line class="ld" x1="235" y1="-50" x2="300" y2="-150"></line><text class="lbl" x="305" y="-152">Spring stop (22)</text>
+          <line class="ld" x1="120" y1="-82" x2="140" y2="-140" id="cordLd"></line><text class="lbl" x="120" y="-142" id="cordLbl">Cord (20)</text>
+          <line class="ld" x1="500" y1="-101" x2="520" y2="-150"></line><text class="lbl" x="525" y="-152">Springs (23)</text>
+          <line class="ld" x1="729" y1="-121" x2="700" y2="-170"></line><text class="lbl" x="600" y="-172">Anchor block (25)</text>
+        </g>
+      </g>
+    </svg>
+    </div>
+    <div id="detailWrap">
+      <svg id="detail" viewBox="-130 -205 340 330" role="img" aria-label="Close-up of the release level under the pulley: drive arm, hook, roller and the lug on the paddle hub, animated with the main view">
+        <use href="#lowL"></use>
+        <g id="dballoons"></g>
+        <text class="vtitle" x="-124" y="-188">RELEASE LEVEL · 2.6×</text>
+        <text class="vlbl" x="-124" y="-173">Under the pulley, seen from above</text>
+      </svg>
+      <p class="dnote">The roller (8) on the hook (7) pushes on the lug (13), which is bolted to the bottom of the paddle hub. To fire, the servo (6) swings its horn off the hook's tail, and the lug shoves the roller out of the way. On reset, the hook's ramped nose rides over the lug and snaps shut.</p>
+    </div>
+  </div>
+  <div class="dwgbar">
+    <div class="legend">
+      <span><i style="background:var(--drive)"></i>Motor, gearbox &amp; drive arm</span>
+      <span><i style="background:var(--stop)"></i>Hook &amp; servo</span>
+      <span><i style="background:var(--energy)"></i>Springs</span>
+      <span><i style="background:var(--ink)"></i>Cord</span>
+      <span><i style="background:var(--absorb)"></i>Absorber</span>
+      <span><i style="background:var(--paddle)"></i>Paddle</span>
+      <span><i style="background:var(--lumber)"></i>Lumber &amp; plywood</span>
+    </div>
+    <label class="tog"><input type="checkbox" id="showBal" checked> Item numbers</label>
+  </div>
+</div>
+
+<div class="card panel2">
+  <div>
+    <div class="state">
+      <div class="kk">Machine state</div>
+      <div class="name" id="stName">At rest</div>
+      <div class="what" id="stWhat"></div>
+    </div>
+    <div class="energy">
+      <div class="row"><label for="accel" class="kk">Average acceleration</label><div class="big"><span id="aVal">20,000</span><small> °/s²</small></div></div>
+      <input type="range" id="accel" min="7000" max="33200" step="100" value="20000">
+      <div class="pred">
+        <span>tip speed <b id="pTip"></b></span><span>cock angle <b id="pTh"></b></span>
+        <span>end speed <b id="pW"></b></span><span>paddle energy <b id="pE"></b></span>
+        <span>swing time <b id="pT"></b></span><span>spring pull <b id="pF"></b></span>
+        <span>motor torque <b id="pTau"></b></span><span>cock time <b id="pC"></b></span>
+      </div>
+    </div>
+    <div class="steps">
+      <button id="bCock"><span class="n">1 · Cock</span><span class="d" id="dCock"></span></button>
+      <button id="bFire"><span class="n">2 · Fire</span><span class="d">servo · 70°</span></button>
+      <button id="bReset"><span class="n">3 · Reset</span><span class="d" id="dReset"></span></button>
+    </div>
+    <div class="runrow">
+      <button id="bAuto">Run one shot</button>
+      <label for="slow" class="hint" style="min-height:0">Swing playback</label>
+      <select id="slow"><option value="40" selected>40× slower</option><option value="10">10× slower</option><option value="1">Real time</option></select>
+    </div>
+    <div class="hint" id="hint"></div>
+  </div>
+  <div>
+    <div class="read">
+      <div class="cell"><div class="kk">NEMA 23</div><div class="v" id="rMotor"></div></div>
+      <div class="cell"><div class="kk">Drive arm</div><div class="v" id="rArm"></div></div>
+      <div class="cell"><div class="kk">Servo &amp; hook</div><div class="v" id="rServo"></div></div>
+      <div class="cell"><div class="kk">Paddle</div><div class="v" id="rPad"></div></div>
+      <div class="cell"><div class="kk">Cord</div><div class="v" id="rCord"></div></div>
+      <div class="cell"><div class="kk">Equalizer</div><div class="v" id="rEq"></div></div>
+      <div class="cell"><div class="kk">Each spring</div><div class="v" id="rSpr"></div></div>
+      <div class="cell"><div class="kk">Absorber</div><div class="v" id="rAbs"></div></div>
+      <div class="cell"><div class="kk">Paddle speed</div><div class="v" id="rW"></div></div>
+      <div class="cell"><div class="kk">Tip speed</div><div class="v" id="rTip"></div></div>
+    </div>
+    <div class="schem">
+      <svg viewBox="0 0 360 226" role="img" aria-label="Schematic: the NEMA 23 turns the worm and the drive arm; the hook on the arm holds the paddle hub; the servo opens the hook; the springs pull the cord, which turns the hub; the spring stop holds the preload; the absorber stops the hub">
+        <path id="eMW" class="sch-e" d="M74,27 H100"></path>
+        <path id="eWA" class="sch-e" d="M180,27 H276"></path>
+        <path id="eAH" class="sch-e" d="M316,42 V72"></path>
+        <path id="eVH" class="sch-e" d="M74,87 H276"></path>
+        <path id="eHP" class="sch-e" d="M316,102 V132"></path>
+        <path id="eTC" class="sch-e" d="M74,147 H100"></path>
+        <path id="eCP" class="sch-e" d="M180,147 H276"></path>
+        <path id="eTS" class="sch-e" d="M39,162 V192"></path>
+        <path id="ePB" class="sch-e" d="M316,162 V192"></path>
+        <rect id="nM" class="sch-box" x="4" y="12" width="70" height="30" rx="4"></rect><text class="sch-t" x="39" y="27">NEMA 23</text>
+        <rect id="nW" class="sch-box" x="100" y="12" width="80" height="30" rx="4"></rect><text class="sch-t" x="140" y="27">10:1 worm</text>
+        <rect id="nA" class="sch-box" x="276" y="12" width="80" height="30" rx="4"></rect><text class="sch-t" x="316" y="27">Drive arm</text>
+        <rect id="nV" class="sch-box" x="4" y="72" width="70" height="30" rx="4"></rect><text class="sch-t" x="39" y="87">Servo</text>
+        <rect id="nH" class="sch-box" x="276" y="72" width="80" height="30" rx="4"></rect><text class="sch-t" x="316" y="87">Hook</text>
+        <rect id="nT" class="sch-box" x="4" y="132" width="70" height="30" rx="4"></rect><text class="sch-t" x="39" y="147">2 springs</text>
+        <rect id="nC" class="sch-box" x="100" y="132" width="80" height="30" rx="4"></rect><text class="sch-t" x="140" y="141">Cord</text><text class="sch-s" x="140" y="155">on the pulley</text>
+        <rect id="nP" class="sch-box" x="276" y="132" width="80" height="30" rx="4"></rect><text class="sch-t" x="316" y="141">Paddle hub</text><text class="sch-s" x="316" y="155">on bushings</text>
+        <rect id="nS" class="sch-box" x="4" y="192" width="70" height="30" rx="4"></rect><text class="sch-t" x="39" y="207">Spring stop</text>
+        <rect id="nB" class="sch-box" x="276" y="192" width="80" height="30" rx="4"></rect><text class="sch-t" x="316" y="207">Absorber</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="sec-head"><h2>One shot, step by step</h2><p>The same sequence the buttons above play.</p></div>
+  <div class="seq">
+    <div class="card"><b>At rest</b><p>The springs are already stretched to 498 mm (30 lb each), but the equalizer sits on the spring stop, so none of that reaches the paddle. The cord has 10 mm of slack.</p></div>
+    <div class="card"><b>Cock</b><p>The motor turns the drive arm clockwise and the hook drags the hub with it. After 10° the cord goes tight. From there the pulley winds it in, lifting the equalizer off the stop and stretching both springs.</p></div>
+    <div class="card"><b>Hold</b><p>The worm and the powered motor hold the arm; the hook holds the hub. At 120° each spring pulls about 41 lb and the equalizer has moved about 106 mm forward.</p></div>
+    <div class="card"><b>Fire</b><p>The servo swings its horn off the hook. The lug knocks the hook open and the springs pull the cord, which spins the pulley and the paddle counterclockwise. The arm and gearbox don't move.</p></div>
+    <div class="card"><b>Stop and reset</b><p>10° before rest the equalizer lands on the spring stop and the cord goes slack. The paddle coasts through rest, and the absorber stops it about 20° later. The motor then brings the arm back and the hook snaps over the lug.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>Settings</h2><p>Same numbers as the v1 PDF. Steps assume 1600 steps per motor turn and 10:1, so 44.4 steps per degree. Paddle 0.022 kg·m², hub 0.0029 kg·m², springs 2 × 2.7 lb/in on a 55 mm cord radius, preload 14.7 N·m held by the spring stop, 10° of slack.</p></div>
+  <div class="tbl"><table id="eTable"><thead><tr><th class="num">Avg accel</th><th class="num">Tip speed</th><th class="num">Cock angle</th><th class="num">Motor steps</th><th class="num">End speed</th><th class="num">Paddle energy</th><th class="num">Swing</th><th class="num">Spring pull, each</th><th class="num">Motor torque</th><th class="num">Cock time</th></tr></thead><tbody></tbody></table></div>
+</section>
+</div>
+
+<script>
+(function(){
+const D2R=Math.PI/180;
+// ---------- option 2 constants ----------
+const K=2.8607, T0=14.7177, TS=10, ETA=0.95, IC=0.02493, IK=0.02625, I_PAD=0.022, TIP=0.406;
+const RC=55, KS=0.4728, F0=133.8, LREST=497.9, RATIO=10, ETA_G=0.85, RPM_RESET=300, STROKE=25;
+const ABS_Y=-75, CAP0=20.05, HOOK_OPEN=26, HORN_REL=-70;
+const ARM_DIR=Math.atan2(60,-34), ROLLER=[23.7,-39.2], PIVOT=[60,-34], TAIL=[88,-27];
+const EQF=-185, EQB=EQF-6.35, YSF=EQB-6, YR=YSF-LREST, SPRX=[-105,-5];
+const $=id=>document.getElementById(id);
+const fmt=(v,d=0)=>v.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const lerp=(a,b,u)=>a+(b-a)*u, ease=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+const P=(r,deg)=>[r*Math.sin(deg*D2R), r*Math.cos(deg*D2R)];
+const pt=p=>p[0].toFixed(1)+','+p[1].toFixed(1);
+const poly=pts=>'M'+pts.map(pt).join('L')+'Z';
+const rotCW=(p,a)=>{const c=Math.cos(a*D2R),s=Math.sin(a*D2R);return [p[0]*c+p[1]*s,-p[0]*s+p[1]*c];};
+const scr=p=>[-p[1],-p[0]];          // machine -> sheet
+function arcPts(r,a0,a1,step=2){const n=Math.max(1,Math.ceil(Math.abs(a1-a0)/step)),o=[];for(let i=0;i<=n;i++)o.push(P(r,lerp(a0,a1,i/n)));return o;}
+function along(t,s){const wx=Math.sin(ARM_DIR),wy=Math.cos(ARM_DIR);return [t*wx-s*wy,t*wy+s*wx];}
+
+// ---------- physics ----------
+const W=e=>T0*e+0.5*K*e*e;
+const omegaEnd=th0=>Math.sqrt(2*ETA*W((th0-TS)*D2R)/IK);
+const alphaOf=th0=>{const w=omegaEnd(th0);return w*w/(2*th0*D2R)/D2R;};
+const AMAX=alphaOf(120);
+function thFor(al){let lo=TS+0.01,hi=120;for(let i=0;i<60;i++){const m=(lo+hi)/2;if(alphaOf(m)<al)lo=m;else hi=m;}return (lo+hi)/2;}
+// absorber: cap position from the stop block's right face at y = -75
+function faceX(th){const s=(ABS_Y+19.05*Math.sin(th*D2R))/Math.cos(th*D2R);return 19.05*Math.cos(th*D2R)+s*Math.sin(th*D2R);}
+const capOf=th=>th>=0?CAP0:Math.min(CAP0+STROKE,Math.max(CAP0,faceX(th)+1));
+let FT=0;{let lo=-40,hi=0;for(let i=0;i<50;i++){const m=(lo+hi)/2;if(faceX(m)+1-CAP0>STROKE)lo=m;else hi=m;}FT=-(lo+hi)/2;}
+function swing(th0){
+  const e0=(th0-TS)*D2R,E0=ETA*W(e0),ws=Math.sqrt(2*E0/IK);
+  const Wa=a=>a>=TS?Math.sqrt(Math.max(0,2*ETA*(W(e0)-W((a-TS)*D2R))/IK)):ws;
+  const n=900,da=th0/n*D2R,out=[[0,th0,0]];let t=0,wPrev=0;
+  for(let i=1;i<=n;i++){const a=th0*(1-i/n),w=Wa(a);t+=i===1?Math.sqrt(2*da*IK/(ETA*(T0+K*e0))):da*0.5*(1/wPrev+1/w);wPrev=w;out.push([t,a,-w/D2R]);}
+  const tS=t,dec=ws*ws/(2*FT*D2R),ta=ws/dec;
+  for(let k=1;k<=40;k++){const s=ta*k/40;out.push([tS+s,-(ws*s-dec*s*s/2)/D2R,-(ws-dec*s)/D2R]);}
+  const tStop=out.find(p=>p[1]<=TS)[0];
+  return {pts:out,tSwing:tS,tEnd:tS+ta,w0:ws,tStop};
+}
+const springT=th=>th<=TS?0:T0+K*(th-TS)*D2R;
+const dOf=th=>th>TS?RC*(th-TS)*D2R:0;                  // equalizer travel, mm
+const slackOf=th=>th<TS?RC*(TS-th)*D2R:0;             // cord slack, mm
+const rpmFor=tau=>Math.min(300,Math.max(60,300-(tau-1.5)/1.1*240));
+function cockStats(th0){let t=0,taum=0;const n=240;for(let i=0;i<n;i++){const a=th0*(i+0.5)/n;const tau=(springT(a)/0.97+0.3)/RATIO/ETA_G;taum=Math.max(taum,tau);t+=RATIO*(th0/n)/360/rpmFor(tau)*60;}
+  return {t,taum,turns:RATIO*th0/360};}
+function predict(al){const th0=thFor(al),r=swing(th0),w=r.w0,c=cockStats(th0);
+  return {th0,dps:w/D2R,tip:w*TIP,E:0.5*I_PAD*w*w,ms:r.tSwing*1000,F:F0+KS*dOf(th0),tau:springT(th0)/RATIO/ETA_G,turns:c.turns,tc:c.t,steps:Math.round(th0*1600*RATIO/360)};}
+
+// ---------- static geometry ----------
+{const u=[Math.sin(300*D2R),Math.cos(300*D2R)],v=[Math.sin(30*D2R),Math.cos(30*D2R)];
+ const q=(t,s)=>[u[0]*t+v[0]*s,u[1]*t+v[1]*s];
+ $('motorP').setAttribute('d',poly([q(60,1.5),q(160,1.5),q(160,58.5),q(60,58.5)]));
+ $('flangeP').setAttribute('d',poly([q(40,0),q(60,0),q(60,60),q(40,60)]));}
+$('armP').setAttribute('d',poly([along(-22,19.05),along(-22,-19.05),along(137,-19.05),along(137,19.05)]));
+$('servoP').setAttribute('d',poly([along(86,-16),along(126.7,-16),along(126.7,3.7),along(86,3.7)]));
+{const ux=ROLLER[0]-PIVOT[0],uy=ROLLER[1]-PIVOT[1],L=Math.hypot(ux,uy),N=[ROLLER[0]+ux/L*13,ROLLER[1]+uy/L*13];
+ const d='M'+[N,PIVOT,TAIL].map(pt).join('L');$('hookO').setAttribute('d',d);$('hookI').setAttribute('d',d);}
+$('rollP').setAttribute('cx',ROLLER[0]);$('rollP').setAttribute('cy',ROLLER[1]);
+$('pivP').setAttribute('cx',PIVOT[0]);$('pivP').setAttribute('cy',PIVOT[1]);
+const HS=along(96,-6),HT=[TAIL[0]+2,TAIL[1]+9];
+$('hornP').setAttribute('d','M'+pt(HS)+'L'+pt(HT));$('hornC').setAttribute('cx',HS[0].toFixed(1));$('hornC').setAttribute('cy',HS[1].toFixed(1));
+$('paddleP').setAttribute('d','M-45,30 Q-45,25 -40,25 L-24.5,25 Q-19.5,25 -19.5,30 L-19.5,150 L7.75,160 L7.75,380 Q7.75,406 -32.25,406 Q-72.25,406 -72.25,380 L-72.25,160 L-45,150 Z');
+{const k=P(56,300);$('knotP').setAttribute('cx',k[0].toFixed(1));$('knotP').setAttribute('cy',k[1].toFixed(1));}
+{let s='';for(const cx of SPRX){s+=`<rect class="stl" x="${cx-3.97}" y="-748" width="7.94" height="46"></rect><rect class="stl" x="${cx-11}" y="-704" width="22" height="5" rx="2"></rect>`;}$('eyes').innerHTML=s;}
+
+// ---------- state ----------
+const st={phase:'rest',beta:0,theta:0,hook:0,horn:0,w:0,motor:'off',servo:'lock',AL:20000,loadedAL:20000,busy:false,clock:'',flash:0};
+const PH={rest:{name:'At rest',what:'The hook on the drive arm holds the lug on the paddle hub. Both springs are stretched to 498 mm and rest on the spring stop, so the cord is slack and the hub feels no force. Pick a setting, then cock.'},
+  armed:{name:'Cocked · holding',what:''},fired:{name:'Fired · waiting to reset',what:''}};
+
+// ---------- dynamic drawing ----------
+function springPath(cx,yF,mapY,mapX,amp,nCoil){ // zig-zag from the front loop yF back to YR
+  const y0=yF-26,y1=YR+26,pts=[[cx,yF],[cx,y0]];
+  for(let i=0;i<nCoil*2;i++){const y=lerp(y0,y1,(i+0.5)/(nCoil*2));pts.push([cx+(i%2?-amp:amp),y]);}
+  pts.push([cx,y1],[cx,YR]);
+  return 'M'+pts.map(p=>(mapX(p)).toFixed(1)+','+(mapY(p)).toFixed(1)).join('L');
+}
+function elRect(cls,yLo,yHi,z0,z1,extra=''){return `<rect class="${cls}" x="${(-yHi).toFixed(1)}" y="${(-z1).toFixed(1)}" width="${(yHi-yLo).toFixed(1)}" height="${(z1-z0).toFixed(1)}" ${extra}></rect>`;}
+function yExt(pts,a){let lo=1e9,hi=-1e9;for(const p of pts){const q=rotCW(p,a);lo=Math.min(lo,q[1]);hi=Math.max(hi,q[1]);}return [lo,hi];}
+const R4=(x0,x1,y0,y1)=>[[x0,y0],[x1,y0],[x1,y1],[x0,y1]];
+const ARM4=[along(-22,19.05),along(-22,-19.05),along(137,-19.05),along(137,19.05)];
+const SERVO4=[along(86,-16),along(126.7,-16),along(126.7,3.7),along(86,3.7)];
+const PAD_PTS=[[-45,25],[-19.5,25],[-19.5,150],[7.75,160],[7.75,406],[-72.25,406],[-72.25,160],[-45,150]];
+
+function render(){
+  const b=st.beta,th=st.theta,d=dOf(th),sl=slackOf(th);
+  $('armG').setAttribute('transform',`rotate(${(-b).toFixed(3)})`);
+  $('hookG').setAttribute('transform',`rotate(${st.hook.toFixed(2)},${PIVOT[0]},${PIVOT[1]})`);
+  $('hornG').setAttribute('transform',`rotate(${st.horn.toFixed(2)},${HS[0].toFixed(2)},${HS[1].toFixed(2)})`);
+  $('hubLow').setAttribute('transform',`rotate(${(-th).toFixed(3)})`);
+  $('hubHigh').setAttribute('transform',`rotate(${(-th).toFixed(3)})`);
+  // equalizer, springs, quick links
+  $('eqP').setAttribute('y',(EQB+d).toFixed(2));
+  const id=p=>p[0],idy=p=>p[1];
+  SPRX.forEach((cx,i)=>$('spr'+i).setAttribute('d',springPath(cx,YSF+d,idy,id,17,34)));
+  $('links').innerHTML=SPRX.map(cx=>`<rect class="stl" x="${cx-3}" y="${(YSF+d).toFixed(1)}" width="6" height="6.35" rx="2"></rect>`).join('')+`<rect class="stl" x="-58" y="${(EQF+d).toFixed(1)}" width="6" height="7" rx="2"></rect>`;
+  $('padFlash').style.opacity=st.flash.toFixed(2);$('elFlash').style.opacity=st.flash.toFixed(2);
+  // cord: around the groove from the knot to the tangent at 270 deg, then straight back to the equalizer
+  const aK=300+th, wrap=arcPts(55,Math.max(aK,270.01),270,3);
+  $('cordWrap').setAttribute('d','M'+wrap.map(pt).join('L'));
+  const yE=EQF+d+7;
+  if(sl>0.3){const bow=Math.min(14,Math.sqrt(sl)*3.2);$('cordP').setAttribute('d',`M-55,0 Q${(-55-bow).toFixed(1)},${((yE)/2).toFixed(1)} -55,${yE.toFixed(1)}`);$('cordP').setAttribute('class','cord slack');}
+  else{$('cordP').setAttribute('d',`M-55,0 L-55,${yE.toFixed(1)}`);$('cordP').setAttribute('class','cord');}
+  // absorber
+  const cap=capOf(th);
+  $('absCap').setAttribute('x',cap.toFixed(2));$('absRod').setAttribute('x',(cap+7).toFixed(2));$('absRod').setAttribute('width',Math.max(1,52.05-cap-7).toFixed(2));
+  // side view, moving parts
+  let e='';
+  const ya=yExt(ARM4,b),ys=yExt(SERVO4,b),yh=yExt([ROLLER,PIVOT,TAIL].map(p=>p),b);
+  e+=elRect('servo',ys[0],ys[1],-41.4,1.5);
+  e+=elRect('drv',ya[0],ya[1],1.5,14.2);
+  e+=elRect('hookE',yh[0]-12,yh[1]+12,14.5,20.85);
+  const yr=yExt(R4(-19.05,19.05,-36,36),th),yl=yExt(R4(-12.7,12.7,-42.35,-36),th);
+  e+=elRect('stl',yl[0],yl[1],21.35,49.05);
+  e+=elRect('alu',yr[0],yr[1],30,49.05);
+  const yp=yExt(PAD_PTS,th);e+=elRect('pad',yp[0],yp[1],43.1,68.1);
+  const yf=yExt(R4(-19.05,19.05,-36,116),th);e+=elRect('alu',yf[0],yf[1],49.05,68.1);
+  e+=elRect('pulley',-63.5,63.5,68.1,96.1);
+  const yb=yExt(R4(-19.05,19.05,-87,36),th);e+=elRect('alu',yb[0],yb[1],96.1,115.15);
+  // springs and equalizer (side view)
+  e+=`<path class="spr" d="${springPath(0,YSF+d,p=>-(82.1+p[0]),p=>-p[1],17,34)}"></path>`;
+  e+=elRect('eq',EQB+d,EQF+d,69.4,94.8);
+  // cord in side view: sags when slack
+  const xs=-(EQF+d),x0=63.5;
+  if(sl>0.3){const sag=Math.min(40,Math.sqrt(sl)*7);e+=`<path class="cord slack" d="M${x0},-82.1 Q${((x0+xs)/2).toFixed(1)},${(-82.1+sag).toFixed(1)} ${xs.toFixed(1)},-82.1"></path>`;}
+  else e+=`<path class="cord" d="M${x0},-82.1 L${xs.toFixed(1)},-82.1"></path>`;
+  $('elMove').innerHTML=e;
+  // readouts
+  $('rMotor').innerHTML={fwd:'<span class="pill on">forward</span>',back:'<span class="pill on">cocking</span>',hold:'<span class="pill lock">holding, powered</span>',off:'<span class="pill off">idle</span>'}[st.motor];
+  $('rArm').textContent=b<0.05?'home':`${fmt(b,1)}° clockwise`;
+  $('rServo').innerHTML=st.servo==='lock'?'<span class="pill lock">locked</span>':'<span class="pill hot">released</span>';
+  $('rPad').textContent=Math.abs(th)<0.05?'at rest':th>0?`${fmt(th,1)}° cocked`:`${fmt(-th,1)}° past rest`;
+  $('rCord').innerHTML=sl>0.3?`<span class="pill off">slack ${fmt(sl)} mm</span>`:'<span class="pill hot">tight</span>';
+  $('rEq').textContent=d<0.3?'on the spring stop':`${fmt(d)} mm forward`;
+  $('rSpr').textContent=`${fmt(LREST+d)} mm · ${fmt((F0+KS*d)/4.448)} lb`;
+  const sm=cap-CAP0;$('rAbs').textContent=sm>0.3?`${fmt(sm)} mm in`:'extended';
+  $('rW').textContent=Math.abs(st.w)>1?`${fmt(Math.abs(st.w))} °/s`:'0 °/s';
+  $('rTip').textContent=Math.abs(st.w)>1?`${fmt(Math.abs(st.w)*D2R*TIP,1)} m/s`:'0 m/s';
+  $('clock').textContent=st.clock;
+  drawBalloons();schematic();
+}
+function setEdge(id,cls,dir){$(id).setAttribute('class','sch-e'+(cls?(' '+cls):'')+(dir?(' flow'+(dir<0?' rev':'')):''));}
+function schematic(){
+  const ph=st.phase,cocking=ph==='cocking',reset=ph==='reset',firing=ph==='firing',armed=ph==='armed',engaged=st.theta>TS+0.05;
+  const motorOn=cocking||reset||armed;
+  setEdge('eMW',motorOn?'act':'',cocking?1:reset?-1:0);setEdge('eWA',motorOn?'act':'',cocking?1:reset?-1:0);
+  setEdge('eAH',(cocking||armed)?'act':'',cocking?1:0);setEdge('eHP',(cocking||armed)?'act':'',cocking?1:0);
+  setEdge('eVH',firing&&st.servo==='rel'&&st.theta>st.beta-15?'st-act':'',firing?1:0);
+  setEdge('eTC',engaged?'en-act':'',firing&&engaged?1:cocking&&engaged?-1:0);
+  setEdge('eCP',engaged?'en-act':'',firing&&engaged?1:cocking&&engaged?-1:0);
+  setEdge('eTS',!engaged?'st-act':'',0);
+  setEdge('ePB',st.theta<-0.2?'ab-act':'',st.theta<-0.2?1:0);
+  ['nM','nW','nA','nV','nH','nT','nC','nP','nS','nB'].forEach(id=>$(id).classList.remove('act'));
+  if(motorOn)['nM','nW','nA'].forEach(id=>$(id).classList.add('act'));
+  if(cocking||armed)['nH','nP'].forEach(id=>$(id).classList.add('act'));
+  if(engaged)['nT','nC'].forEach(id=>$(id).classList.add('act'));else $('nS').classList.add('act');
+  if(firing)['nV','nP'].forEach(id=>$(id).classList.add('act'));
+  if(st.theta<-0.2)$('nB').classList.add('act');
+}
+function sweeps(th0){
+  const wedge=(a0,a1)=>'M0,0L'+arcPts(406,a0,a1).map(pt).join('L')+'Z';
+  $('sweepA').setAttribute('d',wedge(0,th0));$('sweepB').setAttribute('d',wedge(-FT,0));
+  $('sweepTx').textContent=`SHADED: SWING FROM ${fmt(th0,1)}° BACK TO REST · DOTTED: ${FT.toFixed(0)}° INTO THE ABSORBER · NOTHING AT PADDLE HEIGHT IS INSIDE EITHER`;
+}
+
+// ---------- balloons ----------
+// [label, frame, machine point, balloon on the sheet] frames: f fixed, h hub, a arm, e equalizer
+const BAL=[['P','h',[-32,330],[-430,-60]],['14','h',[19,100],[-250,-250]],['15','h',[-40,-48],[-120,-250]],['16','h',[10,-80],[10,-330]],
+  ['26','f',[110,-75],[90,-330]],['27','f',[150,-60],[170,-330]],['3','f',[160,-200],[250,-330]],['2','f',[79,-190],[330,-330]],
+  ['20','f',[-55,-120],[110,205]],['21','e',[-100,-188],[200,205]],['22','f',[-60,-250],[270,205]],['23','e',[-118,-430],[430,205]],
+  ['24','f',[-5,-702],[640,205]],['25','f',[-130,-730],[740,205]],['1','f',[-160,-600],[560,205]],['M','f',[-90,95],[-90,205]]];
+const DBAL=[['5','a',along(118,10),[195,-175]],['6','a',along(110,-10),[195,-120]],['7','k',[78,-29],[195,-65]],['8','k',ROLLER,[195,-10]],
+  ['13','h',[0,-39],[195,45]],['12','h',[10,0],[100,100]],['G','f',[30,30],[-40,100]]];
+function anchor(fr,p){
+  if(fr==='h')return scr(rotCW(p,st.theta));
+  if(fr==='a')return scr(rotCW(p,st.beta));
+  if(fr==='k'){const c=Math.cos(st.hook*D2R),s=Math.sin(st.hook*D2R),dx=p[0]-PIVOT[0],dy=p[1]-PIVOT[1];return scr(rotCW([PIVOT[0]+dx*c-dy*s,PIVOT[1]+dx*s+dy*c],st.beta));}
+  if(fr==='e')return scr([p[0],p[1]+dOf(st.theta)]);
+  return scr(p);
+}
+function balloonSVG(list){let s='';
+  for(const [n,fr,p,[bx,by]] of list){const [tx,ty]=anchor(fr,p);const dx=tx-bx,dy=ty-by,dd=Math.hypot(dx,dy)||1,ux=dx/dd,uy=dy/dd;
+    s+=`<g class="balloon${/[A-Z]/.test(n)?' own':''}"><line x1="${(bx+ux*12).toFixed(1)}" y1="${(by+uy*12).toFixed(1)}" x2="${tx.toFixed(1)}" y2="${ty.toFixed(1)}"></line><circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="1.8" fill="var(--ink)"></circle><circle cx="${bx}" cy="${by}" r="12"></circle><text x="${bx}" y="${by}">${n}</text></g>`;}
+  return s;}
+function drawBalloons(){$('balloons').innerHTML=balloonSVG(BAL);$('dballoons').innerHTML=balloonSVG(DBAL);}
+$('showBal').addEventListener('change',e=>{const v=e.target.checked;$('balloons').style.display=v?'':'none';$('dballoons').style.display=v?'':'none';});
+
+// ---------- slider and table ----------
+$('accel').max=Math.round(AMAX/100)*100;
+$('hdrA').textContent=`7,000–${fmt(Math.round(AMAX/100)*100)} °/s²`;
+function updateAccel(){
+  st.AL=+$('accel').value;$('aVal').textContent=fmt(st.AL);
+  const pr=predict(Math.min(st.AL,AMAX*0.9999));
+  $('pTip').textContent=`${fmt(pr.tip,1)} m/s`;$('pTh').textContent=`${fmt(pr.th0,1)}°`;
+  $('pW').textContent=`${fmt(pr.dps)} °/s`;$('pE').textContent=`${fmt(pr.E,1)} J`;
+  $('pT').textContent=`${fmt(pr.ms,1)} ms`;$('pF').textContent=`${fmt(pr.F/4.448)} lb each`;
+  $('pTau').textContent=`${fmt(pr.tau,2)} N·m`;$('pC').textContent=`${fmt(pr.tc,1)} s`;
+  if(st.phase==='rest')sweeps(pr.th0);
+  updateButtons();
+}
+$('accel').addEventListener('input',updateAccel);
+(function(){let s='';for(const al of [7000,10000,15000,20000,25000,30000,AMAX*0.9999]){const p=predict(al);
+  s+=`<tr><td class="num">${fmt(Math.round(al/100)*100)} °/s²</td><td class="num">${fmt(p.tip,1)} m/s</td><td class="num">${fmt(p.th0,1)}°</td><td class="num">${fmt(p.steps)}</td><td class="num">${fmt(p.dps)} °/s</td><td class="num">${fmt(p.E,1)} J</td><td class="num">${fmt(p.ms,1)} ms</td><td class="num">${fmt(p.F/4.448)} lb</td><td class="num">${fmt(p.tau,2)} N·m</td><td class="num">${fmt(p.tc,1)} s</td></tr>`;}
+  $('eTable').querySelector('tbody').innerHTML=s;})();
+
+// ---------- animation ----------
+function tween(dur,fn){return new Promise(res=>{const t0=performance.now();const step=now=>{const v=Math.min(1,(now-t0)/dur);fn(v);render();if(v<1)requestAnimationFrame(step);else res();};requestAnimationFrame(step);});}
+function setPhase(ph){st.phase=ph;const p=PH[ph];if(p){$('stName').textContent=p.name;if(p.what)$('stWhat').textContent=p.what;}}
+function busy(b,label,what){st.busy=b;if(b){$('stName').textContent=label;$('stWhat').textContent=what;}updateButtons();}
+async function doCock(){
+  const pr=predict(Math.min(st.AL,AMAX*0.9999)),th0=pr.th0;st.loadedAL=st.AL;sweeps(th0);
+  st.phase='cocking';busy(true,'Cocking',`NEMA 23 turns ${fmt(pr.turns,2)} turns. The hook drags the hub clockwise; after 10° the cord goes tight and the pulley winds it in, pulling the equalizer off the spring stop.`);
+  st.motor='back';
+  const real=Math.max(0.9,pr.tc)*1.4;
+  await tween(real*1000,v=>{st.beta=th0*v;st.theta=st.beta;st.clock=`step 1 · ${fmt(pr.tc*v,1)} s of ${fmt(pr.tc,1)} s`;});
+  st.motor='hold';st.clock='';
+  PH.armed.what=`Hub ${fmt(th0,1)}° clockwise. Equalizer ${fmt(dOf(th0))} mm off the stop, each spring pulling ${fmt(pr.F/4.448)} lb. The powered motor holds the arm and the hook holds the hub. Fire when ready.`;
+  setPhase('armed');busy(false);render();
+}
+async function doFire(){
+  const th0=st.theta;st.phase='firing';busy(true,'Firing','The servo swings its horn off the hook tail.');
+  st.servo='rel';
+  await tween(130,v=>{st.horn=HORN_REL*v;});
+  const r=swing(th0),slow=+$('slow').value,pts=r.pts;
+  $('stName').textContent='Swinging';$('stWhat').textContent=(slow>1?`Shown ${slow}× slower than real. `:'Real time. ')+'The springs pull the cord, the cord spins the pulley, and the hub carries the paddle round. The lug knocks the hook open as it leaves.';
+  const gh=$('ghosts');gh.innerHTML='';let last=-1,flashT=null;
+  await tween(Math.max(100,r.tEnd*1000*slow),v=>{
+    const t=v*r.tEnd;let i=0;while(i<pts.length-1&&pts[i+1][0]<t)i++;
+    const A=pts[i],B=pts[Math.min(i+1,pts.length-1)],f=B[0]>A[0]?(t-A[0])/(B[0]-A[0]):0;
+    st.theta=lerp(A[1],B[1],f);st.w=lerp(A[2],B[2],f);
+    const dl=th0-st.theta;st.hook=dl<14?HOOK_OPEN*Math.sin(Math.PI*dl/14):0;
+    if(t>=r.tStop&&flashT===null)flashT=t;
+    st.flash=flashT===null?0:Math.max(0,1-(t-flashT)/(r.tEnd*0.25));
+    st.clock=`${fmt(t*1000,1)} ms after release`;
+    const gk=Math.floor(t*1000/4);
+    if(gk!==last&&t<r.tSwing){last=gk;const g=document.createElementNS('http://www.w3.org/2000/svg','path');g.setAttribute('class','ghost');g.setAttribute('d',$('paddleP').getAttribute('d'));g.setAttribute('transform',`rotate(${(-st.theta).toFixed(2)})`);gh.appendChild(g);}
+  });
+  st.w=0;st.hook=0;st.flash=0;
+  const msg=`Tip reached ${fmt(r.w0*TIP,1)} m/s at rest position, ${fmt(r.tSwing*1000,1)} ms after release. The equalizer hit the spring stop ${TS}° before rest, so the cord went slack and the paddle coasted on. The absorber took it ${FT.toFixed(0)}° past rest.`;
+  const a1=st.theta;
+  await tween(700,v=>{st.theta=lerp(a1,0,ease(v));st.clock='absorber spring pushes the hub back';});
+  st.theta=0;st.clock='';$('ghosts').innerHTML='';
+  PH.fired.what=msg+' Reset brings the arm and hook back.';setPhase('fired');busy(false);render();
+}
+async function doReset(){
+  const b0=st.beta,turns=RATIO*b0/360,real=turns/RPM_RESET*60;
+  st.phase='reset';busy(true,'Resetting','The NEMA 23 brings the arm back counterclockwise. The hook\'s ramped nose rides over the lug and snaps shut.');
+  st.motor='fwd';
+  await tween(Math.max(800,real*1000*1.5),v=>{st.beta=b0*(1-v);st.hook=st.beta<12&&st.beta>0?HOOK_OPEN*Math.sin(Math.PI*st.beta/12):0;st.clock=`step 3 · ${fmt(real*v,1)} s of ${fmt(real,1)} s`;});
+  st.beta=0;st.hook=0;st.motor='off';
+  await tween(220,v=>{st.horn=HORN_REL*(1-v);});
+  st.servo='lock';st.clock='';setPhase('rest');busy(false);updateAccel();render();
+}
+function updateButtons(){
+  const b=st.busy,ph=st.phase,can={cock:!b&&ph==='rest',fire:!b&&ph==='armed',reset:!b&&ph==='fired'};
+  $('bCock').disabled=!can.cock;$('bFire').disabled=!can.fire;$('bReset').disabled=!can.reset;
+  ['bCock','bFire','bReset'].forEach(id=>$(id).classList.remove('next'));
+  const nx=ph==='rest'?'bCock':ph==='armed'?'bFire':ph==='fired'?'bReset':null;
+  if(nx&&!b)$(nx).classList.add('next');
+  $('bAuto').disabled=b;
+  const pr=predict(Math.min(st.AL,AMAX*0.9999));
+  $('dCock').textContent=`NEMA 23 · ${fmt(pr.steps)} steps`;
+  $('dReset').textContent=ph==='fired'?`NEMA 23 · ${fmt(RATIO*st.beta/360,2)} turns`:'NEMA 23 · arm home';
+  $('hint').textContent=(!b&&(ph==='armed'||ph==='fired')&&st.AL!==st.loadedAL)?`Loaded for ${fmt(st.loadedAL)} °/s². The new setting applies to the next cock.`:'';
+}
+$('bCock').onclick=()=>doCock();$('bFire').onclick=()=>doFire();$('bReset').onclick=()=>doReset();
+$('bAuto').onclick=async()=>{
+  if(st.phase==='armed'){await doFire();await doReset();return;}
+  if(st.phase==='fired'){await doReset();}
+  await doCock();await doFire();await doReset();
+};
+setPhase('rest');updateAccel();render();
+})();
+</script>
+
+</body></html>
